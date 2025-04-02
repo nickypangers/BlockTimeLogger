@@ -8,63 +8,66 @@
 import SwiftUI
 
 struct FlightLogSheet: View {
+    let flights: [Flight]
     @Binding var sheetHeight: CGFloat
-    @Binding var fullHeight: CGFloat
     @Binding var isExpanded: Bool
-    @Binding var showFlightSheet: Bool
+    let initialHeight: CGFloat
 
-    let flights: [FlightLogOverview] = [
-        FlightLogOverview(flightNumber: "CPA 123", date: "20 MAR 2025", aircraft: "B-KPM • B77W", departure: "EDDF", arrival: "VHHH", duration: "11:06"),
-        FlightLogOverview(flightNumber: "CPA 456", date: "19 MAR 2025", aircraft: "B-KPL • B77W", departure: "VHHH", arrival: "EDDF", duration: "10:45"),
-        FlightLogOverview(flightNumber: "CPA 789", date: "18 MAR 2025", aircraft: "B-KPQ • B77W", departure: "EDDF", arrival: "KJFK", duration: "12:30")
-    ]
+    private var maxHeight: CGFloat {
+        UIScreen.main.bounds.height * 0.7
+    }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                ForEach(flights.indices, id: \.self) { index in
-                    flights[index]
+        VStack(spacing: 0) {
+            // Drag handle
+            Capsule()
+                .frame(width: 40, height: 5)
+                .foregroundColor(.gray)
+                .padding(.top, 8)
+                .padding(.bottom, 12)
+
+            ScrollView {
+                VStack(spacing: 16) {
+                    // Only show latest flight when collapsed
+                    if !isExpanded {
+                        FlightLogOverview(flight: flights.first!)
+                            .padding(.horizontal)
+                    } else {
+                        // Show all flights when expanded
+                        ForEach(flights) { flight in
+                            FlightLogOverview(flight: flight)
+                                .padding(.horizontal)
+                        }
+                    }
                 }
+                .padding(.bottom) // Extra padding at bottom
             }
-            .padding()
-            .background(
-                GeometryReader { geometry in
-                    Color.clear
-                        .preference(key: ScrollViewHeightKey.self, value: geometry.size.height)
-                }
-            )
         }
         .frame(height: sheetHeight)
+        .frame(maxWidth: .infinity)
         .background(Color(.systemBackground))
         .cornerRadius(16)
         .shadow(radius: 8)
-        .overlay(
-            VStack {
-                Capsule()
-                    .frame(width: 40, height: 5)
-                    .foregroundColor(Color(.systemGray3))
-                    .padding(8)
-                Spacer()
-            }
-        )
-        .onPreferenceChange(ScrollViewHeightKey.self) { height in
-            fullHeight = min(height, UIScreen.main.bounds.height * 0.8)
-        }
         .gesture(
             DragGesture()
                 .onChanged { value in
-                    let newHeight = fullHeight - value.translation.height
-                    sheetHeight = min(max(newHeight, 200), fullHeight)
+                    let newHeight = sheetHeight - value.translation.height
+                    sheetHeight = min(max(newHeight, initialHeight), maxHeight)
                 }
                 .onEnded { value in
                     withAnimation(.spring()) {
                         if value.translation.height < -100 {
-                            sheetHeight = fullHeight
+                            // Swipe up - expand
+                            sheetHeight = maxHeight
                             isExpanded = true
                         } else if value.translation.height > 100 {
-                            showFlightSheet = false
+                            // Swipe down - collapse
+                            sheetHeight = initialHeight
+                            isExpanded = false
                         } else {
-                            sheetHeight = isExpanded ? fullHeight : 200
+                            // Snap to nearest
+                            sheetHeight = sheetHeight > (initialHeight + maxHeight) / 2 ? maxHeight : initialHeight
+                            isExpanded = sheetHeight == maxHeight
                         }
                     }
                 }
@@ -80,5 +83,7 @@ struct ScrollViewHeightKey: PreferenceKey {
 }
 
 #Preview {
-    FlightLogSheet(sheetHeight: .constant(400), fullHeight: .constant(400), isExpanded: .constant(true), showFlightSheet: .constant(true))
+    let flights: [Flight] = FlightDataService.shared.generateMockFlights(count: 20)
+
+    FlightLogSheet(flights: flights, sheetHeight: .constant(700), isExpanded: .constant(true), initialHeight: 100)
 }

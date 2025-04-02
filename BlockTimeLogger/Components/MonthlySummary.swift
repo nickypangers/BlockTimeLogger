@@ -28,6 +28,28 @@ struct MonthlySummary: View {
     }
 }
 
+struct StatisticCard: View {
+    let value: String
+    let label: String
+    let systemImage: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Image(systemName: systemImage)
+                Text(value)
+                    .font(.title3.bold())
+            }
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 8).fill(Color(.tertiarySystemBackground)))
+    }
+}
+
 #Preview {
     MonthlySummary()
 }

@@ -9,17 +9,12 @@ import SwiftUI
 import WrappingHStack
 
 struct FlightLogOverview: View {
-    let flightNumber: String
-    let date: String
-    let aircraft: String
-    let departure: String
-    let arrival: String
-    let duration: String
+    let flight: Flight
         
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(date)
+                Text(flight.formattedDate)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     
@@ -31,7 +26,7 @@ struct FlightLogOverview: View {
                     
                 Spacer()
                     
-                Text(aircraft)
+                Text("\(flight.aircraftRegistration) • \(flight.aircraftType)")
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .lineLimit(1)
@@ -41,7 +36,7 @@ struct FlightLogOverview: View {
                 
             HStack(alignment: .top) {
                 VStack(alignment: .leading) {
-                    Text(departure)
+                    Text(flight.departureAirport)
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundStyle(.black)
@@ -54,12 +49,12 @@ struct FlightLogOverview: View {
                 Spacer()
                     
                 VStack(spacing: 4) {
-                    Text(duration)
+                    Text(flight.formattedBlockTime)
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundStyle(.black)
                         
-                    Text(flightNumber)
+                    Text(flight.flightNumber)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
@@ -67,7 +62,7 @@ struct FlightLogOverview: View {
                 Spacer()
                     
                 VStack(alignment: .trailing) {
-                    Text(arrival)
+                    Text(flight.arrivalAirport)
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundStyle(.black)
@@ -79,6 +74,68 @@ struct FlightLogOverview: View {
             }
                 
             FlowLayout(spacing: 6) {
+                Text("P2X")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule()
+                            .fill(Color(.systemFill))
+                    )
+                Text("PIC: \(flight.isSelf ? "Self" : flight.pilotInCommand)")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule()
+                            .fill(Color(.systemFill)))
+                Text("P2X")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule()
+                            .fill(Color(.systemFill))
+                    )
+                Text("P2X")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule()
+                            .fill(Color(.systemFill))
+                    )
+                Text("P2X")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule()
+                            .fill(Color(.systemFill))
+                    )
+                Text("P2X")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule()
+                            .fill(Color(.systemFill))
+                    )
+                Text("P2X")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule()
+                            .fill(Color(.systemFill))
+                    )
                 Text("P2X")
                     .font(.caption)
                     .fontWeight(.medium)
@@ -152,5 +209,5 @@ struct FlowLayout: Layout {
 }
 
 #Preview {
-    FlightLogOverview(flightNumber: "CPA 123", date: "20 MAR 2025", aircraft: "B-KPM • B77W", departure: "EDDF", arrival: "VHHH", duration: "11:06")
+    FlightLogOverview(flight: FlightDataService.shared.generateMockFlights(count: 1)[0])
 }

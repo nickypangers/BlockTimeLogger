@@ -8,32 +8,88 @@
 import SwiftUI
 
 struct HomeView: View {
-    @State private var selectedTab = 0
+    @State private var sheetHeight: CGFloat = 200 // Height for single flight
+    @State private var isExpanded = false
+
+    // Sample flights data (sorted by date, newest first)
+    @State private var flights: [Flight] = []
+
+    private var latestFlight: Flight {
+        flights.first ?? FlightDataService.shared.generateMockFlights(count: 10).first!
+    }
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            // Tab 1 - Flight Dashboard
-            FlightDashboardView()
-                .tabItem {
-                    Label("Flights", systemImage: "airplane")
-                }
-                .tag(0)
+        NavigationStack {
+            ZStack(alignment: .bottom) {
+                // Main content
+                ScrollView {
+                    VStack(spacing: 20) {
+                        // Header
+                        MonthlySummary()
 
-            // Tab 2 - Logbook
-            LogbookView()
-                .tabItem {
-                    Label("Logbook", systemImage: "book.closed")
-                }
-                .tag(1)
+                        VStack(alignment: .leading, spacing: 16) {
+                            HStack {
+                                Text("Recent Flights")
+                                    .font(.title2)
+                                    .bold()
 
-            // Tab 3 - Profile
-            ProfileView()
-                .tabItem {
-                    Label("Profile", systemImage: "person")
+                                Spacer()
+
+                                Button("See All") {
+                                    // Navigation to full flights list
+                                }
+                                .font(.subheadline)
+                            }
+                            .padding(.horizontal)
+
+                            // Flight Cards
+                            ForEach(flights) { flight in
+                                NavigationLink {
+                                    FlightDetailView(flight: flight)
+                                } label: {
+                                    FlightLogOverview(flight: flight)
+                                        .padding(.horizontal)
+                                }.buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.top, 8)
+                    }
+                    .padding(.vertical)
                 }
-                .tag(2)
+
+                // Always visible flight sheet
+//                FlightLogSheet(
+//                    flights: flights,
+//                    sheetHeight: $sheetHeight,
+//                    isExpanded: $isExpanded,
+//                    initialHeight: 200 // Height for single flight display
+//                )
+//                .zIndex(1)
+
+                // Add Flight Button
+                Button(action: { /* Add flight action */ }) {
+                    Image(systemName: "plus")
+                        .font(.title2.bold())
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(Circle().fill(Color.blue))
+                        .shadow(radius: 4)
+                }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            }
+            .navigationTitle("Flight Logger")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {}) {
+                        Image(systemName: "gear")
+                    }
+                }
+            }
         }
-        .accentColor(.blue) // Set tab bar tint color
+        .onAppear {
+            flights = FlightDataService.shared.generateMockFlights(count: 5)
+        }
     }
 }
 
