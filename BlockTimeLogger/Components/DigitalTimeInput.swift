@@ -80,6 +80,7 @@ struct DigitalTimeInput: View {
             var components = calendar.dateComponents([.year, .month, .day], from: time)
             components.hour = hour
             components.minute = minute
+            components.timeZone = TimeZone(identifier: "UTC")
             
             if let newDate = calendar.date(from: components) {
                 time = newDate

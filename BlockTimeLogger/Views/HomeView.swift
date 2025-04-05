@@ -4,92 +4,92 @@
 //
 //  Created by Nixon Pang on 28/3/2025.
 //
-
 import SwiftUI
 
+// MARK: - View
+
 struct HomeView: View {
-    @State private var sheetHeight: CGFloat = 200 // Height for single flight
-    @State private var isExpanded = false
-
-    // Sample flights data (sorted by date, newest first)
-    @State private var flights: [Flight] = []
-
-    private var latestFlight: Flight {
-        flights.first ?? FlightDataService.shared.generateMockFlights(count: 10).first!
-    }
-
+    @StateObject private var viewModel = HomeViewModel()
+    
     var body: some View {
         NavigationStack {
-            ZStack(alignment: .bottom) {
-                // Main content
+            ZStack(alignment: .bottomTrailing) {
+                // Main Content
                 ScrollView {
                     VStack(spacing: 20) {
-                        // Header
-                        MonthlySummary()
-
-                        VStack(alignment: .leading, spacing: 16) {
-                            HStack {
-                                Text("Recent Flights")
-                                    .font(.title2)
-                                    .bold()
-
-                                Spacer()
-
-                                Button("See All") {
-                                    // Navigation to full flights list
-                                }
-                                .font(.subheadline)
-                            }
-                            .padding(.horizontal)
-
-                            // Flight Cards
-                            ForEach(flights) { flight in
-                                NavigationLink {
-                                    FlightDetailView(flight: flight)
-                                } label: {
-                                    FlightLogOverview(flight: flight)
-                                        .padding(.horizontal)
-                                }.buttonStyle(.plain)
-                            }
-                        }
-                        .padding(.top, 8)
+                        TimeSummary(
+                            monthlyMetrics: viewModel.monthlyMetrics,
+                            allTimeMetrics: viewModel.allTimeMetrics
+                        )
+                        
+                        recentFlightsSection()
                     }
                     .padding(.vertical)
                 }
-
-                // Always visible flight sheet
-//                FlightLogSheet(
-//                    flights: flights,
-//                    sheetHeight: $sheetHeight,
-//                    isExpanded: $isExpanded,
-//                    initialHeight: 200 // Height for single flight display
-//                )
-//                .zIndex(1)
-
+                
                 // Add Flight Button
-                Button(action: { /* Add flight action */ }) {
-                    Image(systemName: "plus")
-                        .font(.title2.bold())
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Circle().fill(Color.blue))
-                        .shadow(radius: 4)
-                }
-                .padding()
-                .frame(maxWidth: .infinity, alignment: .trailing)
+                addFlightButton()
             }
-            .navigationTitle("Flight Logger")
+            .navigationTitle("Summary")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {}) {
-                        Image(systemName: "gear")
+                    Menu {
+                        NavigationLink {
+//                            SettingsView()
+                        } label: {
+                            Label("Settings", systemImage: "gear")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                            .font(.title3)
+                            .foregroundColor(Color("SkyBlue"))
                     }
                 }
             }
         }
-        .onAppear {
-            flights = FlightDataService.shared.generateMockFlights(count: 5)
+    }
+    
+    // MARK: Subviews
+
+    private func recentFlightsSection() -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text("Recent Flights")
+                    .font(.title2.bold())
+                
+                Spacer()
+                
+                NavigationLink("See All") {
+//                    FlightListView()
+                }
+                .font(.subheadline)
+            }
+            .padding(.horizontal)
+            
+            ForEach(viewModel.flights.prefix(5)) { flight in
+                NavigationLink {
+                    FlightDetailView(flight: flight)
+                } label: {
+                    FlightLogOverview(flight: flight)
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal)
+            }
         }
+    }
+    
+    private func addFlightButton() -> some View {
+        NavigationLink {
+            NewFlightView(homeViewModel: viewModel)
+        } label: {
+            Image(systemName: "plus")
+                .font(.title2.bold())
+                .foregroundColor(.white)
+                .padding()
+                .background(Circle().fill(Color("SkyBlue")))
+                .shadow(radius: 4)
+        }
+        .padding()
     }
 }
 

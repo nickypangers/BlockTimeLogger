@@ -6,158 +6,124 @@
 //
 
 import SwiftUI
-import WrappingHStack
 
 struct FlightLogOverview: View {
     let flight: Flight
-        
+    @State private var tagsHeight: CGFloat = 0
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
+            // Top row
             HStack {
                 Text(flight.formattedDate)
                     .font(.subheadline)
-                    .fontWeight(.medium)
-                    
+                    .foregroundColor(Color("SlateGray"))
+                
                 Spacer()
-                    
+                
                 Image(systemName: "airplane")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    
+                    .foregroundColor(Color("SteelGray"))
+                
                 Spacer()
-                    
+                
                 Text("\(flight.aircraftRegistration) • \(flight.aircraftType)")
                     .font(.subheadline)
-                    .fontWeight(.medium)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                    .foregroundColor(Color("SlateGray"))
             }
-            .foregroundColor(.primary.opacity(0.8))
-                
+            
+            // Main flight info
             HStack(alignment: .top) {
                 VStack(alignment: .leading) {
                     Text(flight.departureAirport)
                         .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundStyle(.black)
-                        
-                    Text("1234z")
+                        .bold()
+                    Text(flight.formattedOutTime)
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color("SteelGray"))
                 }
-                    
+                
                 Spacer()
-                    
-                VStack(spacing: 4) {
+                
+                VStack {
                     Text(flight.formattedBlockTime)
                         .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundStyle(.black)
-                        
+                        .bold()
                     Text(flight.flightNumber)
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color("SteelGray"))
                 }
-                    
+                
                 Spacer()
-                    
+                
                 VStack(alignment: .trailing) {
                     Text(flight.arrivalAirport)
                         .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundStyle(.black)
-                        
-                    Text("0123z")
+                        .bold()
+                    Text(flight.formattedInTime)
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color("SteelGray"))
                 }
             }
-                
-            FlowLayout(spacing: 6) {
-                Text("P2X")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(
-                        Capsule()
-                            .fill(Color(.systemFill))
-                    )
-                Text("PIC: \(flight.isSelf ? "Self" : flight.pilotInCommand)")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(
-                        Capsule()
-                            .fill(Color(.systemFill)))
-                Text("P2X")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(
-                        Capsule()
-                            .fill(Color(.systemFill))
-                    )
-                Text("P2X")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(
-                        Capsule()
-                            .fill(Color(.systemFill))
-                    )
-                Text("P2X")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(
-                        Capsule()
-                            .fill(Color(.systemFill))
-                    )
-                Text("P2X")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(
-                        Capsule()
-                            .fill(Color(.systemFill))
-                    )
-                Text("P2X")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(
-                        Capsule()
-                            .fill(Color(.systemFill))
-                    )
-                Text("P2X")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(
-                        Capsule()
-                            .fill(Color(.systemFill))
-                    )
+            
+            // Tags section
+            ZStack {
+                FlowLayout(spacing: 6) {
+                    Text("PIC: \(flight.isSelf ? "Self" : flight.pilotInCommand)")
+                        .tagStyle(color: FlightTag.pic.color)
+                    
+                    ForEach(flight.tags.filter { $0 != .pic }, id: \.self) { tag in
+                        Text(tag.displayName)
+                            .tagStyle(color: tag.color)
+                    }
+                }
+                .background(
+                    GeometryReader { geometry in
+                        Color.clear
+                            .preference(
+                                key: ViewHeightKey.self,
+                                value: geometry.size.height
+                            )
+                    }
+                )
             }
+            .frame(minHeight: tagsHeight)
         }
         .padding()
-        .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.secondarySystemBackground))
+                .fill(Color(.systemBackground))
+                .shadow(color: Color("SteelGray").opacity(0.1), radius: 3, x: 0, y: 1)
         )
-        .foregroundColor(.white)
+        .onPreferenceChange(ViewHeightKey.self) { height in
+            tagsHeight = height ?? 0
+        }
     }
 }
 
-// Flow layout for tags
+// Helper for tag height measurement
+struct ViewHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat? = nil
+    static func reduce(value: inout CGFloat?, nextValue: () -> CGFloat?) {
+        value = value ?? nextValue()
+    }
+}
+
+// Tag style extension
+extension View {
+    func tagStyle(color: Color) -> some View {
+        font(.caption)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            .background(
+                Capsule()
+                    .fill(color.opacity(0.2))
+            )
+            .foregroundColor(color)
+    }
+}
+
+// Flow layout implementation
 struct FlowLayout: Layout {
     var spacing: CGFloat = 8
     
@@ -166,7 +132,6 @@ struct FlowLayout: Layout {
         
         var totalHeight: CGFloat = 0
         var totalWidth: CGFloat = 0
-        
         var lineWidth: CGFloat = 0
         var lineHeight: CGFloat = 0
         
@@ -210,4 +175,6 @@ struct FlowLayout: Layout {
 
 #Preview {
     FlightLogOverview(flight: FlightDataService.shared.generateMockFlights(count: 1)[0])
+        .padding()
+        .background(Color("CloudWhite"))
 }

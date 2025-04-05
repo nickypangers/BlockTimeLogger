@@ -1,0 +1,101 @@
+//
+//  FlightDetailViewModel.swift
+//  BlockTimeLogger
+//
+//  Created by Nixon Pang on 4/4/2025.
+//
+
+import SwiftUI
+
+final class FlightDetailViewModel: ObservableObject {
+    @Published var draftFlight: Flight
+    @Published var isEditing = false
+    @Published var activePicker: PickerType?
+    @Published var showValidationAlert = false
+    
+    private let originalFlight: Flight
+    private let flightDataService: FlightDataServiceProtocol
+    
+    enum PickerType: Identifiable {
+        case date, out, off, on, `in`
+        var id: Self { self }
+    }
+    
+    init(flight: Flight, flightDataService: FlightDataServiceProtocol = FlightDataService.shared) {
+        self.originalFlight = flight
+        self.draftFlight = flight
+        self.flightDataService = flightDataService
+    }
+    
+    // MARK: - Public Methods
+    
+    func startEditing() {
+        print("Original times:")
+        print("OUT: \(originalFlight.outTime)")
+        print("OFF: \(originalFlight.offTime)")
+        print("ON: \(originalFlight.onTime)")
+        print("IN: \(originalFlight.inTime)")
+        
+        print("Draft times before editing:")
+        print("OUT: \(draftFlight.outTime)")
+        print("OFF: \(draftFlight.offTime)")
+        print("ON: \(draftFlight.onTime)")
+        print("IN: \(draftFlight.inTime)")
+
+        isEditing = true
+    }
+    
+    func cancelEditing() {
+        draftFlight = originalFlight
+        isEditing = false
+    }
+    
+    func saveFlight() -> Bool {
+        if validateTimes() {
+            isEditing = false
+            flightDataService.saveFlight(draftFlight)
+            return true
+        } else {
+            showValidationAlert = true
+            return false
+        }
+    }
+    
+    func bindingForPicker(_ picker: PickerType) -> Binding<Date> {
+        switch picker {
+        case .date:
+            return Binding(
+                get: { self.draftFlight.date },
+                set: { self.draftFlight.date = $0 }
+            )
+        case .out:
+            return Binding(
+                get: { self.draftFlight.outTime },
+                set: { self.draftFlight.outTime = $0 }
+            )
+        case .off:
+            return Binding(
+                get: { self.draftFlight.offTime },
+                set: { self.draftFlight.offTime = $0 }
+            )
+        case .on:
+            return Binding(
+                get: { self.draftFlight.onTime },
+                set: { self.draftFlight.onTime = $0 }
+            )
+        case .in:
+            return Binding(
+                get: { self.draftFlight.inTime },
+                set: { self.draftFlight.inTime = $0 }
+            )
+        }
+    }
+    
+    // MARK: - Private Methods
+    
+    private func validateTimes() -> Bool {
+        return draftFlight.outTime < draftFlight.offTime &&
+            draftFlight.offTime < draftFlight.onTime &&
+            draftFlight.onTime < draftFlight.inTime
+    }
+}
