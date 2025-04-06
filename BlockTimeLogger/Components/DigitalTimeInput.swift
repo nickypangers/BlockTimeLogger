@@ -23,6 +23,7 @@ struct DigitalTimeInput: View {
                     .stroke(isInvalid ? Color.red : Color.gray, lineWidth: 1)
             )
             .onChange(of: timeString) {
+                print("digital time input on change: \(timeString)")
                 validateAndUpdateTime()
             }
             .onAppear {
@@ -31,7 +32,10 @@ struct DigitalTimeInput: View {
     }
     
     private func updateTimeString() {
-        let components = Calendar.current.dateComponents([.hour, .minute], from: time)
+        var utcCalendar = Calendar.current
+        utcCalendar.timeZone = TimeZone(identifier: "UTC")!
+        
+        let components = utcCalendar.dateComponents([.hour, .minute], from: time)
         let hour = components.hour ?? 0
         let minute = components.minute ?? 0
         timeString = String(format: "%02d%02d", hour, minute)

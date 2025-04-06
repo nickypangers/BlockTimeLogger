@@ -17,6 +17,8 @@ struct FlightAirportSection: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
 
+            Text("\(flight)")
+
             HStack(spacing: 16) {
                 AirportCard(
                     type: "DEPARTURE",
