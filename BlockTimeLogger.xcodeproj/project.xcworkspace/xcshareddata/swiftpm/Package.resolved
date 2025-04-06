@@ -1,13 +1,13 @@
 {
-  "originHash" : "50578bb08258a739890c5d3d0a495ba4213b27b4dbbbc844c23e93aa2d80550b",
+  "originHash" : "2df6280486a953f9a24c0168cd748e29d7eb8ce422bcacebb5e9e2b4367d9654",
   "pins" : [
     {
-      "identity" : "wrappinghstack",
+      "identity" : "grdb.swift",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/dkk/WrappingHStack",
+      "location" : "https://github.com/groue/GRDB.swift.git",
       "state" : {
-        "revision" : "425d9488ba55f58f0b34498c64c054c77fc2a44b",
-        "version" : "2.2.11"
+        "branch" : "master",
+        "revision" : "04e73c26c4ce8218ab85aaf791942bb0b204f330"
       }
     }
   ],

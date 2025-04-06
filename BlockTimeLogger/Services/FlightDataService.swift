@@ -28,8 +28,6 @@ class FlightDataService: FlightDataServiceProtocol {
     func saveFlight(_ flight: Flight) {
         storedFlights.append(flight)
         storedFlights.sort { $0.date > $1.date } // Keep sorted by date
-        print("Flight saved: \(flight.flightNumber)")
-        print(storedFlights)
     }
     
     func fetchFlights() -> [Flight] {

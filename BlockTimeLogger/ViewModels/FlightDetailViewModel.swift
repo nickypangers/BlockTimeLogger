@@ -30,18 +30,6 @@ final class FlightDetailViewModel: ObservableObject {
     // MARK: - Public Methods
     
     func startEditing() {
-        print("Original times:")
-        print("OUT: \(originalFlight.outTime)")
-        print("OFF: \(originalFlight.offTime)")
-        print("ON: \(originalFlight.onTime)")
-        print("IN: \(originalFlight.inTime)")
-        
-        print("Draft times before editing:")
-        print("OUT: \(draftFlight.outTime)")
-        print("OFF: \(draftFlight.offTime)")
-        print("ON: \(draftFlight.onTime)")
-        print("IN: \(draftFlight.inTime)")
-
         isEditing = true
     }
     

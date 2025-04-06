@@ -23,7 +23,6 @@ struct DigitalTimeInput: View {
                     .stroke(isInvalid ? Color.red : Color.gray, lineWidth: 1)
             )
             .onChange(of: timeString) {
-                print("digital time input on change: \(timeString)")
                 validateAndUpdateTime()
             }
             .onAppear {

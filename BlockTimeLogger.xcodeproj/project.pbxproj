@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3D6071032D9B00D700A186F0 /* WrappingHStack in Frameworks */ = {isa = PBXBuildFile; productRef = 3D6071022D9B00D700A186F0 /* WrappingHStack */; };
+		3D60719A2DA2F6F800A186F0 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 3D6071992DA2F6F800A186F0 /* GRDB */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,7 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D6071032D9B00D700A186F0 /* WrappingHStack in Frameworks */,
+				3D60719A2DA2F6F800A186F0 /* GRDB in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,7 +70,7 @@
 			);
 			name = BlockTimeLogger;
 			packageProductDependencies = (
-				3D6071022D9B00D700A186F0 /* WrappingHStack */,
+				3D6071992DA2F6F800A186F0 /* GRDB */,
 			);
 			productName = BlockTimeLogger;
 			productReference = 3D14E4FD2D968A25004D66C3 /* BlockTimeLogger.app */;
@@ -101,7 +101,7 @@
 			mainGroup = 3D14E4F42D968A25004D66C3;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				3D6071012D9B00D700A186F0 /* XCRemoteSwiftPackageReference "WrappingHStack" */,
+				3D6071982DA2F6F800A186F0 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3D14E4FE2D968A25004D66C3 /* Products */;
@@ -337,21 +337,21 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		3D6071012D9B00D700A186F0 /* XCRemoteSwiftPackageReference "WrappingHStack" */ = {
+		3D6071982DA2F6F800A186F0 /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/dkk/WrappingHStack";
+			repositoryURL = "https://github.com/groue/GRDB.swift.git";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.2.11;
+				branch = master;
+				kind = branch;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		3D6071022D9B00D700A186F0 /* WrappingHStack */ = {
+		3D6071992DA2F6F800A186F0 /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3D6071012D9B00D700A186F0 /* XCRemoteSwiftPackageReference "WrappingHStack" */;
-			productName = WrappingHStack;
+			package = 3D6071982DA2F6F800A186F0 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			productName = GRDB;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
