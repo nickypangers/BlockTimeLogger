@@ -4,18 +4,25 @@
 //
 //  Created by Nixon Pang on 4/4/2025.
 //
-
+import Combine
 import Foundation
 
 // MARK: - ViewModel
 
 final class HomeViewModel: ObservableObject {
-    @Published var flights: [Flight] = []
-    @Published var monthlyMetrics: TimeSummary.MetricGroup = .empty
-    @Published var allTimeMetrics: TimeSummary.MetricGroup = .empty
+    @Published private(set) var flights: [Flight] = [] {
+        didSet {
+            calculateMetrics()
+        }
+    }
+
+    @Published var monthlyMetrics: MetricGroup = .empty
+    @Published var allTimeMetrics: MetricGroup = .empty
         
     private let flightDataService: FlightDataServiceProtocol
     private let calendar = Calendar.current
+    private let db = LocalDatabase.shared
+    private var cancellables = Set<AnyCancellable>()
 
     init(flightDataService: FlightDataServiceProtocol = FlightDataService.shared) {
         self.flightDataService = flightDataService
@@ -23,11 +30,18 @@ final class HomeViewModel: ObservableObject {
     }
 
     func loadFlights() {
-        // Get both stored flights and generate some mock ones
-        let storedFlights = flightDataService.fetchFlights()
-        let mockFlights = flightDataService.generateMockFlights(count: max(5 - storedFlights.count, 0))
-        flights = (storedFlights + mockFlights).sorted { $0.date > $1.date }
-        calculateMetrics()
+        // Get flights from LocalDatabase
+
+        db
+            .observeFlights()
+            .catch { _ in
+                Just([])
+            }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] newFlights in
+                self?.flights = newFlights
+            }
+            .store(in: &cancellables)
     }
         
     private func calculateMetrics() {
@@ -41,7 +55,7 @@ final class HomeViewModel: ObservableObject {
         allTimeMetrics = calculateMetrics(for: flights)
     }
         
-    private func calculateMetrics(for flights: [Flight]) -> TimeSummary.MetricGroup {
+    private func calculateMetrics(for flights: [Flight]) -> MetricGroup {
         let blockHours = flights.reduce(0) { $0 + $1.blockTime } / 3600
         let nightHours = calculateNightHours(for: flights)
         let picHours = flights.reduce(0) { $0 + ($1.isSelf ? $1.blockTime : 0) } / 3600
@@ -52,7 +66,7 @@ final class HomeViewModel: ObservableObject {
             result + flight.sector
         }
         
-        return TimeSummary.MetricGroup(
+        return MetricGroup(
             blockHours: String(format: "%.1f", blockHours),
             flights: "\(flights.count)",
             landings: "\(landings)", // Use the calculated value
@@ -81,18 +95,5 @@ final class HomeViewModel: ObservableObject {
         // Simple implementation: consider any flight with different departure/arrival airports as cross-country
         // In a real app, you might want to add distance requirements
         return flight.departureAirport != flight.arrivalAirport
-    }
-}
-
-extension TimeSummary.MetricGroup {
-    static var empty: TimeSummary.MetricGroup {
-        TimeSummary.MetricGroup(
-            blockHours: "0.0",
-            flights: "0",
-            landings: "0",
-            nightHours: "0.0",
-            picHours: "0.0",
-            crossCountryHours: "0.0"
-        )
     }
 }

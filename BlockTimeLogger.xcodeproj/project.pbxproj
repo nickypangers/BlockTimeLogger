@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3D60719A2DA2F6F800A186F0 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 3D6071992DA2F6F800A186F0 /* GRDB */; };
+		3D6071AA2DA3C30500A186F0 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 3D6071A92DA3C30500A186F0 /* FirebaseAnalytics */; };
+		3D6071AD2DA3C56200A186F0 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 3D6071AC2DA3C56200A186F0 /* GRDB */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,7 +28,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D60719A2DA2F6F800A186F0 /* GRDB in Frameworks */,
+				3D6071AA2DA3C30500A186F0 /* FirebaseAnalytics in Frameworks */,
+				3D6071AD2DA3C56200A186F0 /* GRDB in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,7 +72,8 @@
 			);
 			name = BlockTimeLogger;
 			packageProductDependencies = (
-				3D6071992DA2F6F800A186F0 /* GRDB */,
+				3D6071A92DA3C30500A186F0 /* FirebaseAnalytics */,
+				3D6071AC2DA3C56200A186F0 /* GRDB */,
 			);
 			productName = BlockTimeLogger;
 			productReference = 3D14E4FD2D968A25004D66C3 /* BlockTimeLogger.app */;
@@ -101,7 +104,8 @@
 			mainGroup = 3D14E4F42D968A25004D66C3;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				3D6071982DA2F6F800A186F0 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+				3D6071A82DA3C30500A186F0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				3D6071AB2DA3C56200A186F0 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3D14E4FE2D968A25004D66C3 /* Products */;
@@ -337,7 +341,15 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		3D6071982DA2F6F800A186F0 /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+		3D6071A82DA3C30500A186F0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.11.0;
+			};
+		};
+		3D6071AB2DA3C56200A186F0 /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift.git";
 			requirement = {
@@ -348,9 +360,14 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		3D6071992DA2F6F800A186F0 /* GRDB */ = {
+		3D6071A92DA3C30500A186F0 /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3D6071982DA2F6F800A186F0 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			package = 3D6071A82DA3C30500A186F0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		3D6071AC2DA3C56200A186F0 /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3D6071AB2DA3C56200A186F0 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
 		};
 /* End XCSwiftPackageProductDependency section */

@@ -18,6 +18,8 @@ final class NewFlightViewModel: ObservableObject {
     @Published var enteredOnTime: String = ""
     @Published var enteredInTime: String = ""
     
+    private let db = LocalDatabase.shared
+    
     enum PickerType: Identifiable {
         case date, out, off, on, `in`
         var id: Self { self }
@@ -44,7 +46,15 @@ final class NewFlightViewModel: ObservableObject {
             return false
         }
         
-        flightDataService.saveFlight(flight)
+        do {
+            try db.createFlight(flight)
+            print("created flight: \(flight)")
+
+        } catch {
+            print("error saving flight: \(error)")
+            return false
+        }
+//        flightDataService.saveFlight(flight)
         return true
     }
     

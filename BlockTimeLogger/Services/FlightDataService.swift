@@ -78,6 +78,7 @@ class FlightDataService: FlightDataServiceProtocol {
             let isIFR = Bool.random()
             
             return Flight(
+                id: UUID(),
                 flightNumber: flightNum,
                 date: date,
                 aircraftRegistration: aircraftReg,
@@ -93,7 +94,8 @@ class FlightDataService: FlightDataServiceProtocol {
                 outTime: outTime,
                 offTime: offTime,
                 onTime: onTime,
-                inTime: inTime
+                inTime: inTime,
+                userId: 1
             )
         }.sorted { $0.date > $1.date }
         

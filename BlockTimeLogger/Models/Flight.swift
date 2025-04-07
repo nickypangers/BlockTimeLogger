@@ -1,7 +1,8 @@
 import Foundation
+import GRDB
 
-struct Flight: Identifiable {
-    let id = UUID()
+struct Flight: Identifiable, Codable {
+    var id: UUID
     var flightNumber: String
     var date: Date
     var aircraftRegistration: String
@@ -26,7 +27,53 @@ struct Flight: Identifiable {
     var notes: String = ""
     var sector: Int { 1 } // Each flight counts as 1 sector
     
-    enum Position: String, CaseIterable {
+    var userId: Int
+    
+    // MARK: - Initializer with default values
+
+    init(
+        id: UUID,
+        flightNumber: String,
+        date: Date,
+        aircraftRegistration: String,
+        aircraftType: String,
+        departureAirport: String,
+        arrivalAirport: String,
+        pilotInCommand: String,
+        isSelf: Bool,
+        isPF: Bool = false,
+        isIFR: Bool = false,
+        isVFR: Bool = false,
+        position: Position = .firstOfficer,
+        outTime: Date,
+        offTime: Date,
+        onTime: Date,
+        inTime: Date,
+        notes: String = "",
+        userId: Int
+    ) {
+        self.id = id
+        self.flightNumber = flightNumber
+        self.date = date
+        self.aircraftRegistration = aircraftRegistration
+        self.aircraftType = aircraftType
+        self.departureAirport = departureAirport
+        self.arrivalAirport = arrivalAirport
+        self.pilotInCommand = pilotInCommand
+        self.isSelf = isSelf
+        self.isPF = isPF
+        self.isIFR = isIFR
+        self.isVFR = isVFR
+        self.position = position
+        self.outTime = outTime
+        self.offTime = offTime
+        self.onTime = onTime
+        self.inTime = inTime
+        self.notes = notes
+        self.userId = userId
+    }
+    
+    enum Position: String, CaseIterable, Codable {
         case captain = "CN"
         case firstOfficer = "FO"
         case secondOfficer = "SO"
@@ -82,31 +129,6 @@ struct Flight: Identifiable {
     }
     
     // MARK: - Time Normalization
-    
-//    mutating func normalizeTimes() {
-//        let calendar = Self.utcCalendar
-//        let flightDate = calendar.startOfDay(for: date)
-//
-//        // Normalize outTime (always same day)
-//        outTime = combine(date: flightDate, time: outTime)
-//
-//        // Check if offTime should be next day (UTC)
-//        let offComponents = calendar.dateComponents([.hour, .minute], from: offTime)
-//        let outComponents = calendar.dateComponents([.hour, .minute], from: outTime)
-//
-//        if (offComponents.hour ?? 0) < (outComponents.hour ?? 0) {
-//            // Crossed midnight in UTC
-//            let nextDay = calendar.date(byAdding: .day, value: 1, to: flightDate)!
-//            offTime = combine(date: nextDay, time: offTime)
-//            onTime = combine(date: nextDay, time: onTime)
-//            inTime = combine(date: nextDay, time: inTime)
-//        } else {
-//            // Same day
-//            offTime = combine(date: flightDate, time: offTime)
-//            onTime = combine(date: flightDate, time: onTime)
-//            inTime = combine(date: flightDate, time: inTime)
-//        }
-//    }
     
     mutating func normalizeTimes() {
         let normalized = normalizedTimes()
@@ -227,6 +249,7 @@ struct Flight: Identifiable {
     static func emptyFlight() -> Flight {
         let now = Date()
         return Flight(
+            id: UUID(),
             flightNumber: "",
             date: Self.utcCalendar.startOfDay(for: now),
             aircraftRegistration: "",
@@ -243,7 +266,8 @@ struct Flight: Identifiable {
             offTime: now.addingTimeInterval(30 * 60),
             onTime: now.addingTimeInterval(2 * 60 * 60),
             inTime: now.addingTimeInterval(2.5 * 60 * 60),
-            notes: ""
+            notes: "",
+            userId: 1
         )
     }
     
@@ -263,5 +287,35 @@ struct Flight: Identifiable {
         }
             
         return tags
+    }
+}
+
+extension Flight: EncodableRecord, FetchableRecord {}
+
+extension Flight: TableRecord {}
+
+extension Flight: PersistableRecord {
+    // MARK: - PersistableRecord conformance
+
+    func encode(to container: inout PersistenceContainer) {
+        container[Columns.id] = id
+        container[Columns.flightNumber] = flightNumber
+        container[Columns.date] = date
+        container[Columns.aircraftRegistration] = aircraftRegistration
+        container[Columns.aircraftType] = aircraftType
+        container[Columns.departureAirport] = departureAirport
+        container[Columns.arrivalAirport] = arrivalAirport
+        container[Columns.pilotInCommand] = pilotInCommand
+        container[Columns.isSelf] = isSelf
+        container[Columns.isPF] = isPF
+        container[Columns.isIFR] = isIFR
+        container[Columns.isVFR] = isVFR
+        container[Columns.position] = position.rawValue
+        container[Columns.outTime] = outTime
+        container[Columns.offTime] = offTime
+        container[Columns.onTime] = onTime
+        container[Columns.inTime] = inTime
+        container[Columns.notes] = notes
+        container[Columns.userId] = userId
     }
 }

@@ -15,6 +15,7 @@ final class FlightDetailViewModel: ObservableObject {
     
     private let originalFlight: Flight
     private let flightDataService: FlightDataServiceProtocol
+    private let db = LocalDatabase.shared
     
     enum PickerType: Identifiable {
         case date, out, off, on, `in`
@@ -38,10 +39,25 @@ final class FlightDetailViewModel: ObservableObject {
         isEditing = false
     }
     
+    func deleteFlight() -> Bool {
+        do {
+            try db.deleteFlight(originalFlight)
+            return true
+        } catch {
+            print("error deleting flight \(originalFlight.id): \(error)")
+            return false
+        }
+    }
+    
     func saveFlight() -> Bool {
         if validateTimes() {
             isEditing = false
-            flightDataService.saveFlight(draftFlight)
+            do {
+                try db.updateFlight(draftFlight)
+            } catch {
+                print("Error updating flight \(draftFlight.id): \(error)")
+                return false
+            }
             return true
         } else {
             showValidationAlert = true

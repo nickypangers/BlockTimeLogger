@@ -8,9 +8,11 @@
 import Combine
 import Foundation
 import GRDB
+import SwiftUI
 
 struct LocalDatabase {
     private let writer: DatabaseWriter
+    private let calendar = Calendar.current
 
     init(_ writer: DatabaseWriter) throws {
         self.writer = writer
@@ -22,12 +24,24 @@ struct LocalDatabase {
     }
 }
 
-// MARK: - Writes
+// MARK: - Write
 
 extension LocalDatabase {
-    func createFlight(_ flight: Flight) async throws {
-        try await writer.write { db in
+    func createFlight(_ flight: Flight) throws {
+        try writer.write { db in
             try flight.insert(db)
+        }
+    }
+
+    func updateFlight(_ flight: Flight) throws {
+        try writer.write { db in
+            try flight.update(db)
+        }
+    }
+
+    func deleteFlight(_ flight: Flight) throws {
+        _ = try writer.write { db in
+            try flight.delete(db)
         }
     }
 }
@@ -39,18 +53,21 @@ extension LocalDatabase {
         let observation = ValueObservation.tracking { db in
             try Flight.fetchAll(db)
         }
-
         let publisher = observation.publisher(in: reader)
-        return publisher.eraseToAnyPublisher()
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+        return publisher
     }
 }
 
 // MARK: - Reads
 
 extension LocalDatabase {
-    func getFlights() async throws -> [Flight] {
-        try await reader.read { db in
-            try Flight.fetchAll(db)
+    func getFlights() throws -> [Flight] {
+        try reader.read { db in
+            let flights = try Flight.fetchAll(db).sorted { $0.date > $1.date }
+
+            return flights
         }
     }
 }

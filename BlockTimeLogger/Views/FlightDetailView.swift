@@ -35,6 +35,16 @@ struct FlightDetailView: View {
                 }
                 .padding(.horizontal)
                 FlightTimeSummarySection(flight: viewModel.draftFlight)
+
+                if viewModel.isEditing {
+                    Button {
+                        if viewModel.deleteFlight() {
+                            dismiss()
+                        }
+                    } label: {
+                        Text("Delete Flight")
+                    }
+                }
             }
             .padding(.vertical)
         }
