@@ -35,7 +35,7 @@ struct HomeView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         NavigationLink {
-//                            SettingsView()
+//                            SeeAllFlightsView(flights: viewModel.flights)
                         } label: {
                             Label("Settings", systemImage: "gear")
                         }
@@ -60,7 +60,7 @@ struct HomeView: View {
                 Spacer()
                 
                 NavigationLink("See All") {
-//                    FlightListView()
+                    FlightListView(flights: viewModel.flights)
                 }
                 .font(.subheadline)
             }
