@@ -59,9 +59,7 @@ struct FlightDetailView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        if viewModel.saveFlight() {
-                            dismiss()
-                        }
+                        _ = viewModel.saveFlight()
                     }
                     .bold()
                 }

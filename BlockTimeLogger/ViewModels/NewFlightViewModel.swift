@@ -33,29 +33,34 @@ final class NewFlightViewModel: ObservableObject {
     }
     
     func saveFlight() -> Bool {
+        print("NewFlightViewModel: Starting to save flight")
+        
         // Convert entered times to UTC dates
         convertEnteredTimesToDates()
+        print("NewFlightViewModel: Converted times to dates")
         
         // Normalize the times
         flight.normalizeTimes()
+        print("NewFlightViewModel: Normalized times")
         
-        print("new flight view model: \(flight)")
+        print("NewFlightViewModel: Flight before saving: \(flight)")
         
         guard validateFlight() else {
+            print("NewFlightViewModel: Flight validation failed")
             showValidationAlert = true
             return false
         }
         
+        print("NewFlightViewModel: Flight validation passed, saving to database")
+        
         do {
             try db.createFlight(flight)
-            print("created flight: \(flight)")
-
+            print("NewFlightViewModel: Successfully created flight in database: \(flight)")
+            return true
         } catch {
-            print("error saving flight: \(error)")
+            print("NewFlightViewModel: Error saving flight: \(error)")
             return false
         }
-//        flightDataService.saveFlight(flight)
-        return true
     }
     
     private func convertEnteredTimesToDates() {

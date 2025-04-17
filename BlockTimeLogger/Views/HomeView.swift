@@ -66,7 +66,8 @@ struct HomeView: View {
             }
             .padding(.horizontal)
             
-            ForEach(viewModel.flights.prefix(5)) { flight in
+            // Ensure flights are ordered by outTime in descending order
+            ForEach(viewModel.flights.sorted(by: { $0.outTime > $1.outTime }).prefix(5)) { flight in
                 NavigationLink {
                     FlightDetailView(flight: flight)
                 } label: {

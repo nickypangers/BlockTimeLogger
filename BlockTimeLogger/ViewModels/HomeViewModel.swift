@@ -26,28 +26,38 @@ final class HomeViewModel: ObservableObject {
 
     init(flightDataService: FlightDataServiceProtocol = FlightDataService.shared) {
         self.flightDataService = flightDataService
-        loadFlights()
+        setupDatabaseObserver()
+    }
+
+    private func setupDatabaseObserver() {
+        // Observe database changes
+        db.observeFlights()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] flights in
+                print("HomeViewModel: Received \(flights.count) flights from database observer")
+                self?.flights = flights
+            }
+            .store(in: &cancellables)
     }
 
     func loadFlights() {
         // Get flights from LocalDatabase
-
-        db
-            .observeFlights()
-            .catch { _ in
-                Just([])
-            }
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] newFlights in
-                self?.flights = newFlights
-            }
-            .store(in: &cancellables)
+        print("HomeViewModel: Starting to load flights")
+        let flights = db.getFlights()
+        print("HomeViewModel: Received \(flights.count) flights from database")
+        self.flights = flights
     }
         
     private func calculateMetrics() {
-        // Calculate monthly metrics (last 30 days)
+        // Calculate monthly metrics (current calendar month)
+        let calendar = Calendar.current
+        let now = Date()
+        let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now))!
+        let endOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth)!
+        
         let monthlyFlights = flights.filter { flight in
-            calendar.dateComponents([.day], from: flight.date, to: Date()).day ?? 31 <= 30
+            let flightDate = flight.date
+            return flightDate >= startOfMonth && flightDate <= endOfMonth
         }
         monthlyMetrics = calculateMetrics(for: monthlyFlights)
             

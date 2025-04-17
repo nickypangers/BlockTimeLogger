@@ -70,27 +70,47 @@ final class FlightDetailViewModel: ObservableObject {
         case .date:
             return Binding(
                 get: { self.draftFlight.date },
-                set: { self.draftFlight.date = $0 }
+                set: { 
+                    self.draftFlight.date = $0
+                    // Normalize times after date change
+                    self.draftFlight.normalizeTimes()
+                }
             )
         case .out:
             return Binding(
                 get: { self.draftFlight.outTime },
-                set: { self.draftFlight.outTime = $0 }
+                set: { 
+                    self.draftFlight.outTime = $0
+                    // Normalize times after out time change
+                    self.draftFlight.normalizeTimes()
+                }
             )
         case .off:
             return Binding(
                 get: { self.draftFlight.offTime },
-                set: { self.draftFlight.offTime = $0 }
+                set: { 
+                    self.draftFlight.offTime = $0
+                    // Normalize times after off time change
+                    self.draftFlight.normalizeTimes()
+                }
             )
         case .on:
             return Binding(
                 get: { self.draftFlight.onTime },
-                set: { self.draftFlight.onTime = $0 }
+                set: { 
+                    self.draftFlight.onTime = $0
+                    // Normalize times after on time change
+                    self.draftFlight.normalizeTimes()
+                }
             )
         case .in:
             return Binding(
                 get: { self.draftFlight.inTime },
-                set: { self.draftFlight.inTime = $0 }
+                set: { 
+                    self.draftFlight.inTime = $0
+                    // Normalize times after in time change
+                    self.draftFlight.normalizeTimes()
+                }
             )
         }
     }
@@ -98,8 +118,12 @@ final class FlightDetailViewModel: ObservableObject {
     // MARK: - Private Methods
     
     private func validateTimes() -> Bool {
-        return draftFlight.outTime < draftFlight.offTime &&
-            draftFlight.offTime < draftFlight.onTime &&
-            draftFlight.onTime < draftFlight.inTime
+        // First normalize the times to ensure they're in the correct order
+        draftFlight.normalizeTimes()
+        
+        // Then validate the order
+        return draftFlight.outTime <= draftFlight.offTime &&
+            draftFlight.offTime <= draftFlight.onTime &&
+            draftFlight.onTime <= draftFlight.inTime
     }
 }

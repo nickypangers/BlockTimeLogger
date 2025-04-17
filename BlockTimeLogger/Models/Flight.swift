@@ -4,7 +4,64 @@ import GRDB
 struct Flight: Identifiable, Codable {
     var id: UUID
     var flightNumber: String
-    var date: Date
+    private var storedDate: Date
+    var date: Date {
+        get { storedDate }
+        set {
+            let oldDate = storedDate
+            storedDate = newValue
+            
+            // Get the time components from the current times
+            let calendar = Self.utcCalendar
+            let outComponents = calendar.dateComponents([.hour, .minute], from: outTime)
+            let offComponents = calendar.dateComponents([.hour, .minute], from: offTime)
+            let onComponents = calendar.dateComponents([.hour, .minute], from: onTime)
+            let inComponents = calendar.dateComponents([.hour, .minute], from: inTime)
+            
+            // Create new base date for the times
+            let newBaseDate = calendar.startOfDay(for: newValue)
+            
+            // Create new times on the new date
+            let newOutTime = calendar.date(bySettingHour: outComponents.hour ?? 0,
+                                         minute: outComponents.minute ?? 0,
+                                         second: 0,
+                                         of: newBaseDate)!
+            
+            let newOffTime = calendar.date(bySettingHour: offComponents.hour ?? 0,
+                                         minute: offComponents.minute ?? 0,
+                                         second: 0,
+                                         of: newBaseDate)!
+            
+            let newOnTime = calendar.date(bySettingHour: onComponents.hour ?? 0,
+                                        minute: onComponents.minute ?? 0,
+                                        second: 0,
+                                        of: newBaseDate)!
+            
+            let newInTime = calendar.date(bySettingHour: inComponents.hour ?? 0,
+                                        minute: inComponents.minute ?? 0,
+                                        second: 0,
+                                        of: newBaseDate)!
+            
+            // Set the times
+            self.outTime = newOutTime
+            self.offTime = newOffTime
+            self.onTime = newOnTime
+            self.inTime = newInTime
+            
+            // Check if any time crosses midnight and adjust accordingly
+            if newOffTime < newOutTime {
+                self.offTime = calendar.date(byAdding: .day, value: 1, to: newOffTime)!
+            }
+            
+            if newOnTime < newOffTime {
+                self.onTime = calendar.date(byAdding: .day, value: 1, to: newOnTime)!
+            }
+            
+            if newInTime < newOnTime {
+                self.inTime = calendar.date(byAdding: .day, value: 1, to: newInTime)!
+            }
+        }
+    }
     var aircraftRegistration: String
     var aircraftType: String
     var departureAirport: String
@@ -54,7 +111,7 @@ struct Flight: Identifiable, Codable {
     ) {
         self.id = id
         self.flightNumber = flightNumber
-        self.date = date
+        self.storedDate = date
         self.aircraftRegistration = aircraftRegistration
         self.aircraftType = aircraftType
         self.departureAirport = departureAirport
@@ -107,22 +164,6 @@ struct Flight: Identifiable, Codable {
         let normalized = normalizedTimes()
         return normalized.inTime.timeIntervalSince(normalized.onTime)
     }
-    
-//    var blockTime: TimeInterval {
-//        adjustedTime(inTime, reference: outTime).timeIntervalSince(outTime)
-//    }
-//
-//    var flightTime: TimeInterval {
-//        adjustedTime(onTime, reference: offTime).timeIntervalSince(offTime)
-//    }
-//
-//    var taxiOutTime: TimeInterval {
-//        adjustedTime(offTime, reference: outTime).timeIntervalSince(outTime)
-//    }
-//
-//    var taxiInTime: TimeInterval {
-//        adjustedTime(inTime, reference: onTime).timeIntervalSince(onTime)
-//    }
     
     private func adjustedTime(_ time: Date, reference: Date) -> Date {
         time < reference ? time.addingTimeInterval(24 * 3600) : time
@@ -300,7 +341,7 @@ extension Flight: PersistableRecord {
     func encode(to container: inout PersistenceContainer) {
         container[Columns.id] = id
         container[Columns.flightNumber] = flightNumber
-        container[Columns.date] = date
+        container[Columns.date] = storedDate
         container[Columns.aircraftRegistration] = aircraftRegistration
         container[Columns.aircraftType] = aircraftType
         container[Columns.departureAirport] = departureAirport
@@ -317,5 +358,29 @@ extension Flight: PersistableRecord {
         container[Columns.inTime] = inTime
         container[Columns.notes] = notes
         container[Columns.userId] = userId
+    }
+    
+    // MARK: - Row Decoding
+    
+    init(row: Row) {
+        id = row[Columns.id]
+        flightNumber = row[Columns.flightNumber]
+        storedDate = row[Columns.date]
+        aircraftRegistration = row[Columns.aircraftRegistration]
+        aircraftType = row[Columns.aircraftType]
+        departureAirport = row[Columns.departureAirport]
+        arrivalAirport = row[Columns.arrivalAirport]
+        pilotInCommand = row[Columns.pilotInCommand]
+        isSelf = row[Columns.isSelf]
+        isPF = row[Columns.isPF]
+        isIFR = row[Columns.isIFR]
+        isVFR = row[Columns.isVFR]
+        position = Position(rawValue: row[Columns.position]) ?? .firstOfficer
+        outTime = row[Columns.outTime]
+        offTime = row[Columns.offTime]
+        onTime = row[Columns.onTime]
+        inTime = row[Columns.inTime]
+        notes = row[Columns.notes]
+        userId = row[Columns.userId]
     }
 }
