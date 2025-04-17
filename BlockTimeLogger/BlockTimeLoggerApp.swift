@@ -21,12 +21,12 @@ import SwiftUI
 @main
 struct BlockTimeLoggerApp: App {
 //    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-
+    @StateObject private var homeViewModel = HomeViewModel()
+    
     var body: some Scene {
         WindowGroup {
-            NavigationView {
-                HomeView()
-            }
+            HomeView()
+                .environmentObject(homeViewModel)
         }
     }
 }

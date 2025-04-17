@@ -64,6 +64,25 @@ struct FlightAircraftSection: View {
                         Text("SO")
                             .tagStyle(color: FlightTag.secondOfficer.color)
                     }
+
+                    switch flight.flightTimeType {
+                    case .p1:
+                        Text("P1")
+                            .tagStyle(color: Flight.FlightTimeType.p1.color)
+                    case .p1us:
+                        Text("P1 U/S")
+                            .tagStyle(color: Flight.FlightTimeType.p1us.color)
+                    case .p2:
+                        Text("P2")
+                            .tagStyle(color: Flight.FlightTimeType.p2.color)
+                    case .p2x:
+                        Text("P2X")
+                            .tagStyle(color: Flight.FlightTimeType.p2x.color)
+                    case .put:
+                        Text("P U/T")
+                            .tagStyle(color: Flight.FlightTimeType.put.color)
+                    }
+                    
                 }
                 .padding(.top, 4)
             }
@@ -155,6 +174,21 @@ struct FlightAircraftSection: View {
             ifrVfrToggles()
             
             positionPicker()
+            
+            // Flight Time Type
+            VStack(alignment: .leading, spacing: 4) {
+                Text("FLIGHT TIME TYPE")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(Color(.systemGray))
+                    .kerning(0.5)
+                
+                Picker("Flight Time Type", selection: $flight.flightTimeType) {
+                    ForEach(Flight.FlightTimeType.allCases, id: \.self) { type in
+                        Text(type.rawValue).tag(type)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
         }
         .padding()
         .background(Color(.secondarySystemBackground))

@@ -1,5 +1,6 @@
 import Foundation
 import GRDB
+import SwiftUI
 
 struct Flight: Identifiable, Codable {
     var id: UUID
@@ -74,6 +75,7 @@ struct Flight: Identifiable, Codable {
     var isIFR: Bool = false
     var isVFR: Bool = false
     var position: Position = .firstOfficer
+    var flightTimeType: FlightTimeType = .p2
     
     // Timing fields (all in UTC)
     var outTime: Date // Wheels off chocks
@@ -85,6 +87,35 @@ struct Flight: Identifiable, Codable {
     var sector: Int { 1 } // Each flight counts as 1 sector
     
     var userId: Int
+    
+    enum FlightTimeType: String, CaseIterable, Codable {
+        case p1 = "P1"
+        case p1us = "P1 U/S"
+        case p2 = "P2"
+        case p2x = "P2X"
+        case put = "P U/T"
+        
+        var description: String {
+            switch self {
+            case .p1: return "Pilot in Command"
+            case .p1us: return "Pilot in Command Under Supervision"
+            case .p2: return "Co-Pilot"
+            case .p2x: return "Co-Pilot with Extended Duties"
+            case .put: return "Pilot Under Training"
+            }
+        }
+
+        var color: Color {
+            switch self {
+            case .p1: return .blue
+            case .p1us: return .blue
+            case .p2: return .green
+            case .p2x: return .green
+            case .put: return .purple
+            }
+        }
+        
+    }
     
     // MARK: - Initializer with default values
 
@@ -102,6 +133,7 @@ struct Flight: Identifiable, Codable {
         isIFR: Bool = false,
         isVFR: Bool = false,
         position: Position = .firstOfficer,
+        flightTimeType: FlightTimeType = .p2,
         outTime: Date,
         offTime: Date,
         onTime: Date,
@@ -122,6 +154,7 @@ struct Flight: Identifiable, Codable {
         self.isIFR = isIFR
         self.isVFR = isVFR
         self.position = position
+        self.flightTimeType = flightTimeType
         self.outTime = outTime
         self.offTime = offTime
         self.onTime = onTime
@@ -303,6 +336,7 @@ struct Flight: Identifiable, Codable {
             isIFR: false,
             isVFR: false,
             position: .firstOfficer,
+            flightTimeType: .p1,
             outTime: now,
             offTime: now.addingTimeInterval(30 * 60),
             onTime: now.addingTimeInterval(2 * 60 * 60),
@@ -352,6 +386,7 @@ extension Flight: PersistableRecord {
         container[Columns.isIFR] = isIFR
         container[Columns.isVFR] = isVFR
         container[Columns.position] = position.rawValue
+        container[Columns.flightTimeType] = flightTimeType.rawValue
         container[Columns.outTime] = outTime
         container[Columns.offTime] = offTime
         container[Columns.onTime] = onTime
@@ -376,6 +411,7 @@ extension Flight: PersistableRecord {
         isIFR = row[Columns.isIFR]
         isVFR = row[Columns.isVFR]
         position = Position(rawValue: row[Columns.position]) ?? .firstOfficer
+        flightTimeType = FlightTimeType(rawValue: row[Columns.flightTimeType]) ?? .p2
         outTime = row[Columns.outTime]
         offTime = row[Columns.offTime]
         onTime = row[Columns.onTime]
