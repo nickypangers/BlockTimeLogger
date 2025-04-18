@@ -198,12 +198,16 @@ class ExportService {
                 
                 // Draw flight entries
                 let sortedFlights = flights.sorted { $0.date < $1.date }
+                var flightCount = 0
+                var currentPage = 0
+                
                 for flight in sortedFlights {
-                    // Check if we need a new page
+                    // Check if we need a new page (every 26 flights or when we run out of space)
                     let scaledYPosition = yPosition * widthScaleFactor
-                    if scaledYPosition > availableHeight - 50 {
+                    if flightCount >= 26 || scaledYPosition > availableHeight - 50 {
                         context.beginPage()
                         yPosition = 0
+                        currentPage += 1
                         
                         // Reset transform for new page
                         context.cgContext.translateBy(x: leftMargin, y: startY)
@@ -223,6 +227,7 @@ class ExportService {
                         }
                         
                         yPosition += maxHeaderHeight + 8
+                        flightCount = 0
                     }
                     
                     let dateFormatter = DateFormatter()
@@ -232,8 +237,8 @@ class ExportService {
                         dateFormatter.string(from: flight.outTime),
                         flight.aircraftType,
                         flight.aircraftRegistration,
-                        flight.isSelf ? "Self" : flight.pilotInCommand,
-                        flight.isSelf ? "" : "Self", // Co-pilot column is empty when PIC is self
+                        flight.isSelf ? "SELF" : flight.pilotInCommand,
+                        flight.isSelf ? "" : "SELF", // Co-pilot column is empty when PIC is self
                         flight.operatingCapacity.rawValue,
                         flight.departureAirport,
                         flight.arrivalAirport,
@@ -259,6 +264,39 @@ class ExportService {
                     }
                     
                     yPosition += rowHeight + 4
+                    flightCount += 1
+                }
+                
+                // Add spacing before totals
+                yPosition += 8
+                
+                // Check if we have enough space for totals (approximately 3 rows)
+                let spaceNeededForTotals: CGFloat = (rowHeight + 4) * 3
+                let scaledYPosition = yPosition * widthScaleFactor
+                
+                // Only start a new page if we don't have enough space
+                if scaledYPosition + spaceNeededForTotals > availableHeight - 50 {
+                    context.beginPage()
+                    yPosition = 0
+                    
+                    // Reset transform for new page
+                    context.cgContext.translateBy(x: leftMargin, y: startY)
+                    context.cgContext.scaleBy(x: widthScaleFactor, y: widthScaleFactor)
+                    
+                    // Redraw headers on new page
+                    xPosition = 0
+                    for (index, header) in headers.enumerated() {
+                        let headerRect = CGRect(
+                            x: xPosition + cellPadding,
+                            y: yPosition + cellPadding,
+                            width: columnWidths[index] - (cellPadding * 2),
+                            height: maxHeaderHeight - (cellPadding * 2)
+                        )
+                        header.draw(in: headerRect, withAttributes: textAttributes)
+                        xPosition += columnWidths[index] + columnSpacing
+                    }
+                    
+                    yPosition += maxHeaderHeight + 8
                 }
                 
                 // Calculate totals
@@ -267,9 +305,7 @@ class ExportService {
                 let p2Total = flights.filter { $0.operatingCapacity == .p2 || $0.operatingCapacity == .p2x }.reduce(0) { $0 + $1.blockTime }
                 let putTotal = flights.filter { $0.operatingCapacity == .put }.reduce(0) { $0 + $1.blockTime }
                 let grandTotal = flights.reduce(0) { $0 + $1.blockTime }
-                
-                // Add spacing before totals
-                yPosition += 8
+                let instrumentTotal = flights.filter { $0.isIFR }.reduce(0) { $0 + $1.blockTime }
                 
                 // Draw totals row
                 let totalEntries = [
@@ -279,7 +315,7 @@ class ExportService {
                     "\(formatHoursMinutes(p1usTotal))",
                     "\(formatHoursMinutes(p2Total))",
                     "\(formatHoursMinutes(putTotal))",
-                    ""
+                    "\(formatHoursMinutes(instrumentTotal))"
                 ]
                 
                 xPosition = 0
@@ -299,9 +335,8 @@ class ExportService {
                 // Draw grand total row
                 let grandTotalEntries = [
                     "Grand Total",
-                    "", "", "", "", "", "", "", "", "",
-                    "", "", "", "",
-                    "\(formatHoursMinutes(grandTotal))"
+                    "\(formatHoursMinutes(grandTotal))",
+                    "", "", "", "", "", "", "", "", "", "", ""
                 ]
                 
                 xPosition = 0

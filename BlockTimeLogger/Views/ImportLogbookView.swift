@@ -46,7 +46,7 @@ struct ImportLogbookView: View {
                     Sector    Flt                    Block    UTC      UTC       UTC      UTC     Take       Auto
                     Date(UTC)   No.    Sector    Reg   Time   Off-Blk  Airborne  Landing   On-Blk Off  Land  Land     Commander
                     ----------  ----  --------  -----  -----  -------  --------  --------  -------  ---  ----  ----  -------------------
-                    2024/10/01  810   HKG YVR   B-KQY  11:33  08:09    08:24     19:36     19:42     0     0    N     SO KYA
+                    2024/10/01  ABC810   VHHH CYVR   B-AAA  11:33  08:09    08:24     19:36     19:42     0     0    N     APPLESEED J
                     """)
                     .font(.caption)
                     .foregroundColor(.secondary)
