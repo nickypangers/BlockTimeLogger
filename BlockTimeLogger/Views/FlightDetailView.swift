@@ -11,6 +11,7 @@ import SwiftUI
 struct FlightDetailView: View {
     @StateObject private var viewModel: FlightDetailViewModel
     @Environment(\.dismiss) private var dismiss
+    @State private var showDeleteConfirmation = false
 
     init(flight: Flight) {
         _viewModel = StateObject(wrappedValue: FlightDetailViewModel(flight: flight))
@@ -38,11 +39,10 @@ struct FlightDetailView: View {
 
                 if viewModel.isEditing {
                     Button {
-                        if viewModel.deleteFlight() {
-                            dismiss()
-                        }
+                        showDeleteConfirmation = true
                     } label: {
                         Text("Delete Flight")
+                            .foregroundColor(.red)
                     }
                 }
             }
@@ -82,6 +82,20 @@ struct FlightDetailView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text("Times must follow: OUT → OFF → ON → IN with positive durations")
+        }
+        .confirmationDialog(
+            "Delete Flight",
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                if viewModel.deleteFlight() {
+                    dismiss()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Are you sure you want to delete this flight? This action cannot be undone.")
         }
     }
 }

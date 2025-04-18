@@ -125,7 +125,7 @@ class ExportService {
                 let rowHeight: CGFloat = 18
                 let startY: CGFloat = margins
                 let leftMargin: CGFloat = margins
-                let rightMargin: CGFloat = margins
+//                let rightMargin: CGFloat = margins
                 let columnSpacing: CGFloat = 4
                 let cellPadding: CGFloat = 4 // Padding within each cell
                 
@@ -233,7 +233,7 @@ class ExportService {
                         flight.aircraftType,
                         flight.aircraftRegistration,
                         flight.isSelf ? "Self" : flight.pilotInCommand,
-                        flight.isSelf ? "" : "Self",  // Co-pilot column is empty when PIC is self
+                        flight.isSelf ? "" : "Self", // Co-pilot column is empty when PIC is self
                         flight.operatingCapacity.rawValue,
                         flight.departureAirport,
                         flight.arrivalAirport,

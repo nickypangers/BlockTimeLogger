@@ -19,15 +19,15 @@ extension LocalDatabase {
         migrator.registerMigration("v1") { db in
             try createFlightTable(db)
         }
-        
-        migrator.registerMigration("v2") { db in
-            // Update all existing records to have P2X as operatingCapacity
-            try db.execute(sql: """
-                UPDATE \(Flight.databaseTableName)
-                SET \(Flight.Columns.operatingCapacity.rawValue) = 'P2X'
-                WHERE \(Flight.Columns.operatingCapacity.rawValue) IS NULL
-                """)
-        }
+
+        // migrator.registerMigration("v2") { db in
+        //     // Update all existing records to have P2X as operatingCapacity
+        //     try db.execute(sql: """
+        //         UPDATE \(Flight.databaseTableName)
+        //         SET \(Flight.Columns.operatingCapacity.rawValue) = 'P2X'
+        //         WHERE \(Flight.Columns.operatingCapacity.rawValue) IS NULL
+        //         """)
+        // }
 
         return migrator
     }

@@ -9,7 +9,7 @@ struct Flight: Identifiable, Codable {
     var date: Date {
         get { storedDate }
         set {
-            let oldDate = storedDate
+//            let oldDate = storedDate
             storedDate = newValue
             
             // Get the time components from the current times

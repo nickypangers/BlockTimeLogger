@@ -35,6 +35,14 @@ extension LocalDatabase {
         print("LocalDatabase: Successfully created flight: \(flight.id)")
     }
 
+    func createMultipleFlights(_ flights: [Flight]) throws {
+        try writer.write { db in
+            try flights.forEach { try $0.insert(db) }
+        }
+
+        print("LocalDatabase: Successfully created \(flights.count) flights")
+    }
+
     func updateFlight(_ flight: Flight) throws {
         print("LocalDatabase: Updating flight: \(flight.id)")
         try writer.write { db in

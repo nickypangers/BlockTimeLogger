@@ -33,10 +33,14 @@ struct HomeView: View {
             .navigationTitle("Summary")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-   
                     Menu {
-                                          NavigationLink {
-                        ExportLogbookView()
+                        NavigationLink {
+                            ImportLogbookView(homeViewModel: viewModel)
+                        } label: {
+                            Label("Import", systemImage: "square.and.arrow.down")
+                        }
+                        NavigationLink {
+                            ExportLogbookView()
                         } label: {
                             Label("Export", systemImage: "square.and.arrow.up")
                         }
