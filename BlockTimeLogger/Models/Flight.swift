@@ -75,7 +75,7 @@ struct Flight: Identifiable, Codable {
     var isIFR: Bool = false
     var isVFR: Bool = false
     var position: Position = .firstOfficer
-    var flightTimeType: FlightTimeType = .p2
+    var operatingCapacity: OperatingCapacity = .p2
     
     // Timing fields (all in UTC)
     var outTime: Date // Wheels off chocks
@@ -88,7 +88,7 @@ struct Flight: Identifiable, Codable {
     
     var userId: Int
     
-    enum FlightTimeType: String, CaseIterable, Codable {
+    enum OperatingCapacity: String, CaseIterable, Codable {
         case p1 = "P1"
         case p1us = "P1 U/S"
         case p2 = "P2"
@@ -114,7 +114,6 @@ struct Flight: Identifiable, Codable {
             case .put: return .purple
             }
         }
-        
     }
     
     // MARK: - Initializer with default values
@@ -133,7 +132,7 @@ struct Flight: Identifiable, Codable {
         isIFR: Bool = false,
         isVFR: Bool = false,
         position: Position = .firstOfficer,
-        flightTimeType: FlightTimeType = .p2,
+        operatingCapacity: OperatingCapacity = .p2,
         outTime: Date,
         offTime: Date,
         onTime: Date,
@@ -154,7 +153,7 @@ struct Flight: Identifiable, Codable {
         self.isIFR = isIFR
         self.isVFR = isVFR
         self.position = position
-        self.flightTimeType = flightTimeType
+        self.operatingCapacity = operatingCapacity
         self.outTime = outTime
         self.offTime = offTime
         self.onTime = onTime
@@ -336,7 +335,7 @@ struct Flight: Identifiable, Codable {
             isIFR: false,
             isVFR: false,
             position: .firstOfficer,
-            flightTimeType: .p1,
+            operatingCapacity: .p1,
             outTime: now,
             offTime: now.addingTimeInterval(30 * 60),
             onTime: now.addingTimeInterval(2 * 60 * 60),
@@ -386,7 +385,7 @@ extension Flight: PersistableRecord {
         container[Columns.isIFR] = isIFR
         container[Columns.isVFR] = isVFR
         container[Columns.position] = position.rawValue
-        container[Columns.flightTimeType] = flightTimeType.rawValue
+        container[Columns.operatingCapacity] = operatingCapacity.rawValue
         container[Columns.outTime] = outTime
         container[Columns.offTime] = offTime
         container[Columns.onTime] = onTime
@@ -411,7 +410,7 @@ extension Flight: PersistableRecord {
         isIFR = row[Columns.isIFR]
         isVFR = row[Columns.isVFR]
         position = Position(rawValue: row[Columns.position]) ?? .firstOfficer
-        flightTimeType = FlightTimeType(rawValue: row[Columns.flightTimeType]) ?? .p2
+        operatingCapacity = OperatingCapacity(rawValue: row[Columns.operatingCapacity]) ?? .p2
         outTime = row[Columns.outTime]
         offTime = row[Columns.offTime]
         onTime = row[Columns.onTime]

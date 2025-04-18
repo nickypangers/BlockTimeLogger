@@ -6,9 +6,9 @@
 //
 
 import Foundation
+import PDFKit
 import SwiftUI
 import UniformTypeIdentifiers
-import PDFKit
 
 class ExportService {
     static let shared = ExportService()
@@ -19,9 +19,9 @@ class ExportService {
     
     func exportLogbook(
         flights: [Flight],
-        style: ExportLogbookView.LogbookStyle,
-        format: ExportLogbookView.ExportFormat,
-        dateRange: ExportLogbookView.DateRange,
+        style: Export.LogbookStyle,
+        format: Export.ExportFormat,
+        dateRange: Export.DateRange,
         completion: @escaping (Result<URL, Error>) -> Void
     ) {
         // Filter flights based on date range
@@ -40,7 +40,7 @@ class ExportService {
     
     // MARK: - Private Helper Methods
     
-    private func filterFlightsByDateRange(_ flights: [Flight], dateRange: ExportLogbookView.DateRange) -> [Flight] {
+    private func filterFlightsByDateRange(_ flights: [Flight], dateRange: Export.DateRange) -> [Flight] {
         let calendar = Calendar.current
         let now = Date()
         
@@ -78,192 +78,242 @@ class ExportService {
         }
     }
     
-    private func generatePDF(flights: [Flight], style: ExportLogbookView.LogbookStyle, completion: @escaping (Result<URL, Error>) -> Void) {
+    private func generatePDF(flights: [Flight], style: Export.LogbookStyle, completion: @escaping (Result<URL, Error>) -> Void) {
         let fileName = "\(style.rawValue)_Logbook.pdf"
         let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
         
-        // Create PDF document
-        let pdfMetaData = [
-            kCGPDFContextCreator: "BlockTimeLogger",
-            kCGPDFContextAuthor: "Pilot",
-            kCGPDFContextTitle: "\(style.rawValue) Pilot Logbook"
-        ]
+        // Create PDF document with landscape orientation
         let format = UIGraphicsPDFRendererFormat()
-        format.documentInfo = pdfMetaData as [String: Any]
         
-        let pageWidth: CGFloat = 8.5 * 72.0
-        let pageHeight: CGFloat = 11 * 72.0
+        // Set landscape orientation (A4 landscape: 297mm x 210mm)
+        let pageWidth: CGFloat = 11.7 * 72.0 // 297mm
+        let pageHeight: CGFloat = 8.3 * 72.0 // 210mm
         let pageRect = CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
         
+        // Create PDF context with landscape orientation
         let renderer = UIGraphicsPDFRenderer(bounds: pageRect, format: format)
         
         do {
             try renderer.writePDF(to: tempURL) { context in
+                // Set the page orientation to landscape
+                context.cgContext.translateBy(x: 0, y: pageHeight)
+                context.cgContext.scaleBy(x: 1.0, y: -1.0)
+                
                 context.beginPage()
                 
-                let titleFont = UIFont.boldSystemFont(ofSize: 24)
-                let headerFont = UIFont.boldSystemFont(ofSize: 16)
-                let textFont = UIFont.systemFont(ofSize: 12)
+                // Calculate scaling factor based on A4 landscape dimensions
+                let margins: CGFloat = 20 // 20pt margins on each side
+                let availableWidth = pageWidth - (margins * 2)
+                let availableHeight = pageHeight - (margins * 2)
                 
-                // Title
-                let titleAttributes: [NSAttributedString.Key: Any] = [
-                    .font: titleFont,
-                    .foregroundColor: UIColor.black
-                ]
-                let title = "PILOT LOGBOOK"
-                let titleSize = title.size(withAttributes: titleAttributes)
-                let titleRect = CGRect(x: (pageWidth - titleSize.width) / 2,
-                                     y: 50,
-                                     width: titleSize.width,
-                                     height: titleSize.height)
-                title.draw(in: titleRect, withAttributes: titleAttributes)
-                
-                // Subtitle
-                let subtitleAttributes: [NSAttributedString.Key: Any] = [
-                    .font: headerFont,
-                    .foregroundColor: UIColor.black
-                ]
-                let subtitle = "Civil Aviation Department of Hong Kong"
-                let subtitleSize = subtitle.size(withAttributes: subtitleAttributes)
-                let subtitleRect = CGRect(x: (pageWidth - subtitleSize.width) / 2,
-                                        y: titleRect.maxY + 20,
-                                        width: subtitleSize.width,
-                                        height: subtitleSize.height)
-                subtitle.draw(in: subtitleRect, withAttributes: subtitleAttributes)
-                
-                // Pilot Information
-                var yPosition = subtitleRect.maxY + 40
-                let pilotInfoAttributes: [NSAttributedString.Key: Any] = [
+                // Base font size that we'll scale
+                let baseFontSize: CGFloat = 8
+                let textFont = UIFont.systemFont(ofSize: baseFontSize)
+                let textAttributes: [NSAttributedString.Key: Any] = [
                     .font: textFont,
-                    .foregroundColor: UIColor.black
+                    .foregroundColor: UIColor.black,
+                    .paragraphStyle: {
+                        let style = NSMutableParagraphStyle()
+                        style.alignment = .left
+                        style.lineBreakMode = .byWordWrapping
+                        return style
+                    }()
                 ]
                 
-                let pilotInfo = [
-                    "PILOT INFORMATION",
-                    "Name: [PILOT NAME]",
-                    "License Number: [LICENSE NUMBER]",
-                    "Date of Issue: [DATE]",
-                    "Date of Expiry: [DATE]"
-                ]
+                // Table setup with scaled dimensions
+                let columnWidths: [CGFloat] = [60, 80, 80, 80, 80, 80, 60, 60, 60, 60, 40, 40, 40, 40, 60]
+                let rowHeight: CGFloat = 18
+                let startY: CGFloat = margins
+                let leftMargin: CGFloat = margins
+                let rightMargin: CGFloat = margins
+                let columnSpacing: CGFloat = 4
+                let cellPadding: CGFloat = 4 // Padding within each cell
                 
-                for info in pilotInfo {
-                    let infoSize = info.size(withAttributes: pilotInfoAttributes)
-                    let infoRect = CGRect(x: 50, y: yPosition, width: infoSize.width, height: infoSize.height)
-                    info.draw(in: infoRect, withAttributes: pilotInfoAttributes)
-                    yPosition += infoSize.height + 10
-                }
+                // Calculate total table width
+                let tableWidth = columnWidths.reduce(0, +) + (CGFloat(columnWidths.count - 1) * columnSpacing)
                 
-                // Summary Section
-                yPosition += 20
-                let summaryTitle = "SUMMARY OF FLIGHT TIME"
-                let summaryTitleSize = summaryTitle.size(withAttributes: [.font: headerFont])
-                let summaryTitleRect = CGRect(x: 50, y: yPosition, width: summaryTitleSize.width, height: summaryTitleSize.height)
-                summaryTitle.draw(in: summaryTitleRect, withAttributes: [.font: headerFont])
+                // Calculate scale factor to fit width
+                let widthScaleFactor = min(1.0, availableWidth / tableWidth)
                 
-                yPosition += summaryTitleSize.height + 20
-                
-                let summaryItems = [
-                    "Total Block Time: \(calculateTotalBlockTime(flights))",
-                    "Total Flight Time: \(calculateTotalFlightTime(flights))",
-                    // "Total Night Hours: \(calculateTotalNightHours(flights))",
-                    "Total Landings: \(calculateTotalLandings(flights))"
-                ]
-                
-                for item in summaryItems {
-                    let itemSize = item.size(withAttributes: pilotInfoAttributes)
-                    let itemRect = CGRect(x: 50, y: yPosition, width: itemSize.width, height: itemSize.height)
-                    item.draw(in: itemRect, withAttributes: pilotInfoAttributes)
-                    yPosition += itemSize.height + 10
-                }
-                
-                // Flight Log Table
-                yPosition += 20
-                let tableTitle = "DETAILED FLIGHT LOG"
-                let tableTitleSize = tableTitle.size(withAttributes: [.font: headerFont])
-                let tableTitleRect = CGRect(x: 50, y: yPosition, width: tableTitleSize.width, height: tableTitleSize.height)
-                tableTitle.draw(in: tableTitleRect, withAttributes: [.font: headerFont])
-                
-                yPosition += tableTitleSize.height + 20
+                // Apply scale transform
+                context.cgContext.translateBy(x: leftMargin, y: startY)
+                context.cgContext.scaleBy(x: widthScaleFactor, y: widthScaleFactor)
                 
                 // Table Headers
-                let columnWidths: [CGFloat] = [80, 100, 100, 80, 80, 80, 80, 50, 50, 80, 100]
-                let headers = ["Date", "Aircraft Type", "Registration", "Departure", "Arrival", "Block Time", "Flight Time", "Night", "Landings", "Position", "Remarks"]
+                let headers = [
+                    "Date",
+                    "Aircraft Type",
+                    "Aircraft Registration",
+                    "Pilot-in-command",
+                    "Co-pilot or student",
+                    "Holder's operating capacity",
+                    "From",
+                    "To",
+                    "No. of Take-offs",
+                    "No. of Landings",
+                    "P1",
+                    "P1(U/S)",
+                    "P2/P2X",
+                    "P/UT",
+                    "Instrument Time"
+                ]
                 
-                // Draw header row
-                var xPosition: CGFloat = 50
+                // Draw header row with multiline support
+                var xPosition: CGFloat = 0
+                var yPosition: CGFloat = 0
+                var maxHeaderHeight: CGFloat = rowHeight
+                
+                // First pass: calculate maximum header height
                 for (index, header) in headers.enumerated() {
-                    let headerSize = header.size(withAttributes: pilotInfoAttributes)
-                    let headerRect = CGRect(x: xPosition, y: yPosition, width: columnWidths[index], height: headerSize.height)
-                    header.draw(in: headerRect, withAttributes: pilotInfoAttributes)
-                    xPosition += columnWidths[index] + 10
+                    let headerRect = CGRect(
+                        x: xPosition + cellPadding,
+                        y: yPosition + cellPadding,
+                        width: columnWidths[index] - (cellPadding * 2),
+                        height: .greatestFiniteMagnitude
+                    )
+                    let boundingRect = header.boundingRect(
+                        with: headerRect.size,
+                        options: [.usesLineFragmentOrigin, .usesFontLeading],
+                        attributes: textAttributes,
+                        context: nil
+                    )
+                    maxHeaderHeight = max(maxHeaderHeight, boundingRect.height + (cellPadding * 2))
+                    xPosition += columnWidths[index] + columnSpacing
                 }
                 
-                yPosition += 20
+                // Second pass: draw headers with proper height and padding
+                xPosition = 0
+                for (index, header) in headers.enumerated() {
+                    let headerRect = CGRect(
+                        x: xPosition + cellPadding,
+                        y: yPosition + cellPadding,
+                        width: columnWidths[index] - (cellPadding * 2),
+                        height: maxHeaderHeight - (cellPadding * 2)
+                    )
+                    header.draw(in: headerRect, withAttributes: textAttributes)
+                    xPosition += columnWidths[index] + columnSpacing
+                }
                 
-                // Draw separator line
-                let separatorPath = UIBezierPath()
-                separatorPath.move(to: CGPoint(x: 50, y: yPosition))
-                separatorPath.addLine(to: CGPoint(x: pageWidth - 50, y: yPosition))
-                UIColor.black.setStroke()
-                separatorPath.stroke()
-                
-                yPosition += 20
+                yPosition += maxHeaderHeight + 8
                 
                 // Draw flight entries
                 let sortedFlights = flights.sorted { $0.date < $1.date }
                 for flight in sortedFlights {
-                    if yPosition > pageHeight - 100 {
+                    // Check if we need a new page
+                    let scaledYPosition = yPosition * widthScaleFactor
+                    if scaledYPosition > availableHeight - 50 {
                         context.beginPage()
-                        yPosition = 50
+                        yPosition = 0
+                        
+                        // Reset transform for new page
+                        context.cgContext.translateBy(x: leftMargin, y: startY)
+                        context.cgContext.scaleBy(x: widthScaleFactor, y: widthScaleFactor)
+                        
+                        // Redraw headers on new page with multiline support and padding
+                        xPosition = 0
+                        for (index, header) in headers.enumerated() {
+                            let headerRect = CGRect(
+                                x: xPosition + cellPadding,
+                                y: yPosition + cellPadding,
+                                width: columnWidths[index] - (cellPadding * 2),
+                                height: maxHeaderHeight - (cellPadding * 2)
+                            )
+                            header.draw(in: headerRect, withAttributes: textAttributes)
+                            xPosition += columnWidths[index] + columnSpacing
+                        }
+                        
+                        yPosition += maxHeaderHeight + 8
                     }
                     
-                    let nightIndicator = isNightFlight(flight) ? "Y" : "N"
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateFormat = "dd MMM yyyy"
+                    
                     let entries = [
-                        flight.formattedDate,
+                        dateFormatter.string(from: flight.outTime),
                         flight.aircraftType,
                         flight.aircraftRegistration,
+                        flight.isSelf ? "Self" : flight.pilotInCommand,
+                        flight.isSelf ? "" : "Self",  // Co-pilot column is empty when PIC is self
+                        flight.operatingCapacity.rawValue,
                         flight.departureAirport,
                         flight.arrivalAirport,
-                        formatHoursMinutes(flight.blockTime),
-                        formatHoursMinutes(flight.flightTime),
-                        nightIndicator,
-                        "\(flight.sector)",
-                        flight.flightTimeType.rawValue,
-                        flight.notes
+                        String(flight.sector),
+                        String(flight.sector),
+                        flight.operatingCapacity == .p1 ? "\(formatHoursMinutes(flight.blockTime))" : "",
+                        flight.operatingCapacity == .p1us ? "\(formatHoursMinutes(flight.blockTime))" : "",
+                        flight.operatingCapacity == .p2 || flight.operatingCapacity == .p2x ? "\(formatHoursMinutes(flight.blockTime))" : "",
+                        flight.operatingCapacity == .put ? "\(formatHoursMinutes(flight.blockTime))" : "",
+                        flight.isIFR ? "\(formatHoursMinutes(flight.blockTime))" : ""
                     ]
                     
-                    xPosition = 50
+                    xPosition = 0
                     for (index, entry) in entries.enumerated() {
-                        let entrySize = entry.size(withAttributes: pilotInfoAttributes)
-                        let entryRect = CGRect(x: xPosition, y: yPosition, width: columnWidths[index], height: entrySize.height)
-                        entry.draw(in: entryRect, withAttributes: pilotInfoAttributes)
-                        xPosition += columnWidths[index] + 10
+                        let entryRect = CGRect(
+                            x: xPosition + cellPadding,
+                            y: yPosition + cellPadding,
+                            width: columnWidths[index] - (cellPadding * 2),
+                            height: rowHeight - (cellPadding * 2)
+                        )
+                        entry.draw(in: entryRect, withAttributes: textAttributes)
+                        xPosition += columnWidths[index] + columnSpacing
                     }
                     
-                    yPosition += 20
+                    yPosition += rowHeight + 4
                 }
                 
-                // Draw footer on last page
-                if yPosition < pageHeight - 100 {
-                    yPosition = pageHeight - 100
-                    let footerText = "I certify that the above entries are true and correct."
-                    let footerSize = footerText.size(withAttributes: pilotInfoAttributes)
-                    let footerRect = CGRect(x: 50, y: yPosition, width: footerSize.width, height: footerSize.height)
-                    footerText.draw(in: footerRect, withAttributes: pilotInfoAttributes)
-                    
-                    yPosition += footerSize.height + 40
-                    
-                    let signatureText = "Signature: _____________________"
-                    let signatureSize = signatureText.size(withAttributes: pilotInfoAttributes)
-                    let signatureRect = CGRect(x: 50, y: yPosition, width: signatureSize.width, height: signatureSize.height)
-                    signatureText.draw(in: signatureRect, withAttributes: pilotInfoAttributes)
-                    
-                    yPosition += signatureSize.height + 20
-                    
-                    let dateText = "Date: \(Date().formatted(date: .long, time: .omitted))"
-                    let dateSize = dateText.size(withAttributes: pilotInfoAttributes)
-                    let dateRect = CGRect(x: 50, y: yPosition, width: dateSize.width, height: dateSize.height)
-                    dateText.draw(in: dateRect, withAttributes: pilotInfoAttributes)
+                // Calculate totals
+                let p1Total = flights.filter { $0.operatingCapacity == .p1 }.reduce(0) { $0 + $1.blockTime }
+                let p1usTotal = flights.filter { $0.operatingCapacity == .p1us }.reduce(0) { $0 + $1.blockTime }
+                let p2Total = flights.filter { $0.operatingCapacity == .p2 || $0.operatingCapacity == .p2x }.reduce(0) { $0 + $1.blockTime }
+                let putTotal = flights.filter { $0.operatingCapacity == .put }.reduce(0) { $0 + $1.blockTime }
+                let grandTotal = flights.reduce(0) { $0 + $1.blockTime }
+                
+                // Add spacing before totals
+                yPosition += 8
+                
+                // Draw totals row
+                let totalEntries = [
+                    "Total",
+                    "", "", "", "", "", "", "", "", "",
+                    "\(formatHoursMinutes(p1Total))",
+                    "\(formatHoursMinutes(p1usTotal))",
+                    "\(formatHoursMinutes(p2Total))",
+                    "\(formatHoursMinutes(putTotal))",
+                    ""
+                ]
+                
+                xPosition = 0
+                for (index, entry) in totalEntries.enumerated() {
+                    let entryRect = CGRect(
+                        x: xPosition + cellPadding,
+                        y: yPosition + cellPadding,
+                        width: columnWidths[index] - (cellPadding * 2),
+                        height: rowHeight - (cellPadding * 2)
+                    )
+                    entry.draw(in: entryRect, withAttributes: textAttributes)
+                    xPosition += columnWidths[index] + columnSpacing
+                }
+                
+                yPosition += rowHeight + 4
+                
+                // Draw grand total row
+                let grandTotalEntries = [
+                    "Grand Total",
+                    "", "", "", "", "", "", "", "", "",
+                    "", "", "", "",
+                    "\(formatHoursMinutes(grandTotal))"
+                ]
+                
+                xPosition = 0
+                for (index, entry) in grandTotalEntries.enumerated() {
+                    let entryRect = CGRect(
+                        x: xPosition + cellPadding,
+                        y: yPosition + cellPadding,
+                        width: columnWidths[index] - (cellPadding * 2),
+                        height: rowHeight - (cellPadding * 2)
+                    )
+                    entry.draw(in: entryRect, withAttributes: textAttributes)
+                    xPosition += columnWidths[index] + columnSpacing
                 }
             }
             
@@ -302,31 +352,23 @@ class ExportService {
         let onComponents = calendar.dateComponents([.hour], from: flight.onTime)
         
         return (offComponents.hour ?? 12) >= 18 || (offComponents.hour ?? 12) <= 6 ||
-               (onComponents.hour ?? 12) >= 18 || (onComponents.hour ?? 12) <= 6
+            (onComponents.hour ?? 12) >= 18 || (onComponents.hour ?? 12) <= 6
     }
     
     private func formatHoursMinutes(_ interval: TimeInterval) -> String {
-        let hours = Int(interval) / 3600
-        let minutes = (Int(interval) % 3600) / 60
-        return String(format: "%d:%02d", hours, minutes)
+        let totalHours = interval / 3600
+        return String(format: "%.1f", totalHours)
     }
     
-    private func generateCSV(flights: [Flight], style: ExportLogbookView.LogbookStyle, completion: @escaping (Result<URL, Error>) -> Void) {
+    private func generateCSV(flights: [Flight], style: Export.LogbookStyle, completion: @escaping (Result<URL, Error>) -> Void) {
         let fileName = "\(style.rawValue)_Logbook.csv"
         let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
         
         var content = ""
-        
         // Add header based on style
         switch style {
         case .hkcad:
             content += "Date,Aircraft Type,Departure,Arrival,Block Time,Remarks\n"
-        // case .caa:
-        //     content += "Date,Aircraft Type,Registration,Departure,Arrival,Block Time,Remarks\n"
-        // case .faa:
-        //     content += "Date,Aircraft Type,Registration,Departure,Arrival,Block Time,Remarks\n"
-        // case .easa:
-        //     content += "Date,Aircraft Type,Registration,Departure,Arrival,Block Time,Remarks\n"
         }
         
         // Add flight data
@@ -342,7 +384,7 @@ class ExportService {
         }
     }
     
-    private func generateExcel(flights: [Flight], style: ExportLogbookView.LogbookStyle, completion: @escaping (Result<URL, Error>) -> Void) {
+    private func generateExcel(flights: [Flight], style: Export.LogbookStyle, completion: @escaping (Result<URL, Error>) -> Void) {
         // In a real app, this would generate an Excel file using a library like XlsxWriter
         // For now, we'll create a CSV file with .xlsx extension as a placeholder
         
@@ -355,12 +397,6 @@ class ExportService {
         switch style {
         case .hkcad:
             content += "Date,Aircraft Type,Departure,Arrival,Block Time,Remarks\n"
-        // case .caa:
-        //     content += "Date,Aircraft Type,Registration,Departure,Arrival,Block Time,Remarks\n"
-        // case .faa:
-        //     content += "Date,Aircraft Type,Registration,Departure,Arrival,Block Time,Remarks\n"
-        // case .easa:
-        //     content += "Date,Aircraft Type,Registration,Departure,Arrival,Block Time,Remarks\n"
         }
         
         // Add flight data
@@ -386,4 +422,4 @@ class ExportService {
         
         viewController.present(activityVC, animated: true)
     }
-} 
+}

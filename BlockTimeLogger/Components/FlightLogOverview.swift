@@ -77,22 +77,22 @@ struct FlightLogOverview: View {
                             .tagStyle(color: tag.color)
                     }
 
-                    switch flight.flightTimeType {
+                    switch flight.operatingCapacity {
                     case .p1:
                         Text("P1")
-                            .tagStyle(color: Flight.FlightTimeType.p1.color)
+                            .tagStyle(color: Flight.OperatingCapacity.p1.color)
                     case .p1us:
                         Text("P1 U/S")
-                            .tagStyle(color: Flight.FlightTimeType.p1us.color)
+                            .tagStyle(color: Flight.OperatingCapacity.p1us.color)
                     case .p2:
                         Text("P2")
-                            .tagStyle(color: Flight.FlightTimeType.p2.color)
+                            .tagStyle(color: Flight.OperatingCapacity.p2.color)
                     case .p2x:
                         Text("P2X")
-                            .tagStyle(color: Flight.FlightTimeType.p2x.color)
+                            .tagStyle(color: Flight.OperatingCapacity.p2x.color)
                     case .put:
                         Text("P U/T")
-                            .tagStyle(color: Flight.FlightTimeType.put.color)
+                            .tagStyle(color: Flight.OperatingCapacity.put.color)
                     }
                     
                 }

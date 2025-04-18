@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct FlightTimeTypePicker: View {
-    @Binding var selectedType: Flight.FlightTimeType
+struct OperatingCapacityPicker: View {
+    @Binding var selectedType: Flight.OperatingCapacity
     let isEditing: Bool
     
     var body: some View {
@@ -12,7 +12,7 @@ struct FlightTimeTypePicker: View {
             
             if isEditing {
                 Picker("Position", selection: $selectedType) {
-                    ForEach(Flight.FlightTimeType.allCases, id: \.self) { type in
+                    ForEach(Flight.OperatingCapacity.allCases, id: \.self) { type in
                         Text(type.rawValue)
                             .tag(type)
                     }
@@ -37,12 +37,12 @@ struct FlightTimeTypePicker: View {
 
 #Preview {
     VStack(spacing: 20) {
-        FlightTimeTypePicker(
+        OperatingCapacityPicker(
             selectedType: .constant(.p2),
             isEditing: true
         )
         
-        FlightTimeTypePicker(
+        OperatingCapacityPicker(
             selectedType: .constant(.p1),
             isEditing: false
         )

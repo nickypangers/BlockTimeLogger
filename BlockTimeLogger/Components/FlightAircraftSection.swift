@@ -65,22 +65,22 @@ struct FlightAircraftSection: View {
                             .tagStyle(color: FlightTag.secondOfficer.color)
                     }
 
-                    switch flight.flightTimeType {
+                    switch flight.operatingCapacity {
                     case .p1:
                         Text("P1")
-                            .tagStyle(color: Flight.FlightTimeType.p1.color)
+                            .tagStyle(color: Flight.OperatingCapacity.p1.color)
                     case .p1us:
                         Text("P1 U/S")
-                            .tagStyle(color: Flight.FlightTimeType.p1us.color)
+                            .tagStyle(color: Flight.OperatingCapacity.p1us.color)
                     case .p2:
                         Text("P2")
-                            .tagStyle(color: Flight.FlightTimeType.p2.color)
+                            .tagStyle(color: Flight.OperatingCapacity.p2.color)
                     case .p2x:
                         Text("P2X")
-                            .tagStyle(color: Flight.FlightTimeType.p2x.color)
+                            .tagStyle(color: Flight.OperatingCapacity.p2x.color)
                     case .put:
                         Text("P U/T")
-                            .tagStyle(color: Flight.FlightTimeType.put.color)
+                            .tagStyle(color: Flight.OperatingCapacity.put.color)
                     }
                     
                 }
@@ -175,15 +175,15 @@ struct FlightAircraftSection: View {
             
             positionPicker()
             
-            // Flight Time Type
+            // Operating Capacity
             VStack(alignment: .leading, spacing: 4) {
-                Text("FLIGHT TIME TYPE")
+                Text("Operating Capacity")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(Color(.systemGray))
                     .kerning(0.5)
                 
-                Picker("Flight Time Type", selection: $flight.flightTimeType) {
-                    ForEach(Flight.FlightTimeType.allCases, id: \.self) { type in
+                Picker("Operating Capacity", selection: $flight.operatingCapacity) {
+                    ForEach(Flight.OperatingCapacity.allCases, id: \.self) { type in
                         Text(type.rawValue).tag(type)
                     }
                 }

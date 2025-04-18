@@ -14,7 +14,7 @@ extension Flight {
 
     // Define database columns
     enum Columns: String, ColumnExpression {
-        case id, flightNumber, date, aircraftRegistration, aircraftType, flightTimeType
+        case id, flightNumber, date, aircraftRegistration, aircraftType, operatingCapacity
         case departureAirport, arrivalAirport, pilotInCommand, isSelf
         case isPF, isIFR, isVFR, position, outTime, offTime, onTime, inTime, notes
         case userId

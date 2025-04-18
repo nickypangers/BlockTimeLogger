@@ -21,11 +21,11 @@ extension LocalDatabase {
         }
         
         migrator.registerMigration("v2") { db in
-            // Update all existing records to have P2X as flightTimeType
+            // Update all existing records to have P2X as operatingCapacity
             try db.execute(sql: """
                 UPDATE \(Flight.databaseTableName)
-                SET \(Flight.Columns.flightTimeType.rawValue) = 'P2X'
-                WHERE \(Flight.Columns.flightTimeType.rawValue) IS NULL
+                SET \(Flight.Columns.operatingCapacity.rawValue) = 'P2X'
+                WHERE \(Flight.Columns.operatingCapacity.rawValue) IS NULL
                 """)
         }
 
@@ -39,7 +39,7 @@ extension LocalDatabase {
             t.column(Flight.Columns.date.rawValue, .datetime).notNull()
             t.column(Flight.Columns.aircraftRegistration.rawValue, .text).notNull()
             t.column(Flight.Columns.aircraftType.rawValue, .text).notNull()
-            t.column(Flight.Columns.flightTimeType.rawValue, .text).notNull()
+            t.column(Flight.Columns.operatingCapacity.rawValue, .text).notNull()
             t.column(Flight.Columns.departureAirport.rawValue, .text).notNull()
             t.column(Flight.Columns.arrivalAirport.rawValue, .text).notNull()
             t.column(Flight.Columns.pilotInCommand.rawValue, .text).notNull()
