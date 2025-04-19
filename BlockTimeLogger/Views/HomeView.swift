@@ -34,6 +34,19 @@ struct HomeView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
+                        Button {
+                            for flight in viewModel.flights {
+                                do {
+                                    try LocalDatabase.shared.deleteFlight(flight)
+                                } catch {
+                                    print("error: \(error)")
+                                    break
+                                }
+                            }
+                        } label: {
+                            Label("Clear All", systemImage: "bin.xmark")
+                        }
+
                         NavigationLink {
                             ImportLogbookView(homeViewModel: viewModel)
                         } label: {

@@ -22,14 +22,16 @@ struct FlightAirportSection: View {
                     type: "DEPARTURE",
                     icao: $flight.departureAirport,
                     time: flight.formattedOutTime,
-                    isEditing: isEditing
+                    isEditing: isEditing,
+                    database: LocalDatabase.shared
                 )
 
                 AirportCard(
                     type: "ARRIVAL",
                     icao: $flight.arrivalAirport,
                     time: flight.formattedInTime,
-                    isEditing: isEditing
+                    isEditing: isEditing,
+                    database: LocalDatabase.shared
                 )
             }
         }

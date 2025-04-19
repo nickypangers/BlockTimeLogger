@@ -6,6 +6,13 @@ struct Airport: Identifiable, Codable {
     var name: String
     var icao: String
     var iata: String
+
+    init(id: UUID = UUID(), name: String, icao: String, iata: String) {
+        self.id = id
+        self.name = name
+        self.icao = icao
+        self.iata = iata
+    }
 }
 
 extension Airport: EncodableRecord, FetchableRecord {}

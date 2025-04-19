@@ -5,6 +5,7 @@
 //  Created by Nixon Pang on 5/4/2025.
 //
 
+import Foundation
 import SwiftUI
 
 struct FlightAircraftSection: View {
@@ -53,17 +54,16 @@ struct FlightAircraftSection: View {
                     }
                 
                     // Position tag
-                    switch flight.position {
-                    case .captain:
-                        Text("CN")
-                            .tagStyle(color: FlightTag.captain.color)
-                    case .firstOfficer:
-                        Text("FO")
-                            .tagStyle(color: FlightTag.firstOfficer.color)
-                    case .secondOfficer:
-                        Text("SO")
-                            .tagStyle(color: FlightTag.secondOfficer.color)
-                    }
+                    let positionTag: FlightTag = {
+                        let pos = flight.position as Flight.Position
+                        switch pos {
+                        case .captain: return .captain
+                        case .firstOfficer: return .firstOfficer
+                        case .secondOfficer: return .secondOfficer
+                        }
+                    }()
+                    Text(positionTag.displayName)
+                        .tagStyle(color: positionTag.color)
 
                     switch flight.operatingCapacity {
                     case .p1:
@@ -82,7 +82,6 @@ struct FlightAircraftSection: View {
                         Text("P U/T")
                             .tagStyle(color: Flight.OperatingCapacity.put.color)
                     }
-                    
                 }
                 .padding(.top, 4)
             }
@@ -222,8 +221,31 @@ struct FlightAircraftSection: View {
 }
 
 #Preview {
+    let mockFlight = Flight(
+        id: UUID(),
+        flightNumber: "TEST123",
+        date: Date(),
+        aircraftRegistration: "N12345",
+        aircraftType: "B737",
+        departureAirport: "",
+        arrivalAirport: "",
+        pilotInCommand: "John Doe",
+        isSelf: true,
+        isPF: true,
+        isIFR: true,
+        isVFR: false,
+        position: .captain,
+        operatingCapacity: .p1,
+        outTime: Date(),
+        offTime: Date().addingTimeInterval(3600),
+        onTime: Date().addingTimeInterval(7200),
+        inTime: Date().addingTimeInterval(8100),
+        notes: nil,
+        userId: 1
+    )
+    
     FlightAircraftSection(
-        flight: .constant(FlightDataService().generateMockFlights(count: 1)[0]),
+        flight: .constant(mockFlight),
         isEditing: true
     )
 }

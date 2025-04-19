@@ -9,51 +9,42 @@ import Foundation
 import GRDB
 
 extension LocalDatabase {
-    var migrator: DatabaseMigrator {
+    static var migrator: DatabaseMigrator {
         var migrator = DatabaseMigrator()
-
-#if DEBUG
-        migrator.eraseDatabaseOnSchemaChange = true
-#endif
-
+        
         migrator.registerMigration("v1") { db in
-            try createFlightTable(db)
+            // Create flight table
+            try db.create(table: "flight") { t in
+                t.column("id", .text).primaryKey()
+                t.column("flightNumber", .text).notNull()
+                t.column("date", .datetime).notNull()
+                t.column("aircraftRegistration", .text).notNull()
+                t.column("aircraftType", .text).notNull()
+                t.column("departureAirport", .text).notNull()
+                t.column("arrivalAirport", .text).notNull()
+                t.column("pilotInCommand", .text).notNull()
+                t.column("isSelf", .boolean).notNull()
+                t.column("isPF", .boolean).notNull()
+                t.column("isIFR", .boolean).notNull()
+                t.column("isVFR", .boolean).notNull()
+                t.column("position", .text).notNull()
+                t.column("operatingCapacity", .text).notNull()
+                t.column("outTime", .datetime).notNull()
+                t.column("offTime", .datetime).notNull()
+                t.column("onTime", .datetime).notNull()
+                t.column("inTime", .datetime).notNull()
+                t.column("notes", .text)
+                t.column("userId", .integer).notNull()
+            }
+            
+            // Create airport table
+            try db.create(table: "airport") { t in
+                t.column("id", .text).primaryKey()
+                t.column("icao", .text).notNull().unique()
+                t.column("name", .text).notNull()
+            }
         }
-
-        // migrator.registerMigration("v2") { db in
-        //     // Update all existing records to have P2X as operatingCapacity
-        //     try db.execute(sql: """
-        //         UPDATE \(Flight.databaseTableName)
-        //         SET \(Flight.Columns.operatingCapacity.rawValue) = 'P2X'
-        //         WHERE \(Flight.Columns.operatingCapacity.rawValue) IS NULL
-        //         """)
-        // }
-
+        
         return migrator
-    }
-
-    private func createFlightTable(_ db: GRDB.Database) throws {
-        try db.create(table: Flight.databaseTableName) { t in
-            t.column(Flight.Columns.id.rawValue, .text).primaryKey()
-            t.column(Flight.Columns.flightNumber.rawValue, .text).notNull()
-            t.column(Flight.Columns.date.rawValue, .datetime).notNull()
-            t.column(Flight.Columns.aircraftRegistration.rawValue, .text).notNull()
-            t.column(Flight.Columns.aircraftType.rawValue, .text).notNull()
-            t.column(Flight.Columns.operatingCapacity.rawValue, .text).notNull()
-            t.column(Flight.Columns.departureAirport.rawValue, .text).notNull()
-            t.column(Flight.Columns.arrivalAirport.rawValue, .text).notNull()
-            t.column(Flight.Columns.pilotInCommand.rawValue, .text).notNull()
-            t.column(Flight.Columns.isSelf.rawValue, .boolean).notNull()
-            t.column(Flight.Columns.isPF.rawValue, .boolean).notNull()
-            t.column(Flight.Columns.isIFR.rawValue, .boolean).notNull()
-            t.column(Flight.Columns.isVFR.rawValue, .boolean).notNull()
-            t.column(Flight.Columns.position.rawValue, .text).notNull()
-            t.column(Flight.Columns.outTime.rawValue, .datetime).notNull()
-            t.column(Flight.Columns.offTime.rawValue, .datetime).notNull()
-            t.column(Flight.Columns.onTime.rawValue, .datetime).notNull()
-            t.column(Flight.Columns.inTime.rawValue, .datetime).notNull()
-            t.column(Flight.Columns.notes.rawValue, .text)
-            t.column(Flight.Columns.userId.rawValue, .integer).notNull()
-        }
     }
 }

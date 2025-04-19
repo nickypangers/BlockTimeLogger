@@ -9,14 +9,48 @@ import Foundation
 import GRDB
 
 extension Flight {
-    // Define database table name
-    static let databaseTableName = "flight"
-
-    // Define database columns
     enum Columns: String, ColumnExpression {
-        case id, flightNumber, date, aircraftRegistration, aircraftType, operatingCapacity
-        case departureAirport, arrivalAirport, pilotInCommand, isSelf
-        case isPF, isIFR, isVFR, position, outTime, offTime, onTime, inTime, notes
+        case id
+        case flightNumber
+        case date = "storedDate"
+        case aircraftRegistration
+        case aircraftType
+        case departureAirport
+        case arrivalAirport
+        case pilotInCommand
+        case isSelf
+        case isPF
+        case isIFR
+        case isVFR
+        case position
+        case operatingCapacity
+        case outTime = "storedOutTime"
+        case offTime = "storedOffTime"
+        case onTime = "storedOnTime"
+        case inTime = "storedInTime"
+        case notes
         case userId
+    }
+    
+    static let databaseTableName = "flight"
+    
+    // Join query to get departure airport ICAO
+    static func departureAirportQuery() -> String {
+        """
+        SELECT a.icao
+        FROM \(databaseTableName) f
+        JOIN \(Airport.databaseTableName) a ON a.id = f.\(Columns.departureAirport)
+        WHERE f.id = ?
+        """
+    }
+    
+    // Join query to get arrival airport ICAO
+    static func arrivalAirportQuery() -> String {
+        """
+        SELECT a.icao
+        FROM \(databaseTableName) f
+        JOIN \(Airport.databaseTableName) a ON a.id = f.\(Columns.arrivalAirport)
+        WHERE f.id = ?
+        """
     }
 }

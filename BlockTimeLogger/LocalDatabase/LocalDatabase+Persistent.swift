@@ -26,6 +26,11 @@ extension LocalDatabase {
 
             let database = try LocalDatabase(writer)
 
+            // Initialize airports in a background task
+            Task {
+                await database.initializeAirports()
+            }
+
             return database
         } catch {
             fatalError("ERROR: \(error)")

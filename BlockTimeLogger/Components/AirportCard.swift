@@ -11,6 +11,8 @@ struct AirportCard: View {
     @Binding var icao: String
     let time: String
     let isEditing: Bool
+    let database: LocalDatabase
+    @State private var showingAirportSearch = false
 
     var body: some View {
         VStack(spacing: 8) {
@@ -19,10 +21,28 @@ struct AirportCard: View {
                 .foregroundColor(.secondary)
 
             if isEditing {
-                TextField("ICAO", text: $icao)
-                    .font(.system(size: 24, weight: .bold, design: .monospaced))
-                    .aviationInputStyle()
-                    .multilineTextAlignment(.center)
+                if icao.isEmpty {
+                    Button(action: {
+                        showingAirportSearch = true
+                    }) {
+                        HStack {
+                            Text("Select")
+                                .font(.system(size: 24, weight: .bold, design: .monospaced))
+                                .foregroundColor(.blue)
+                            Image(systemName: "chevron.down")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.blue)
+                        }
+                    }
+                } else {
+                    Button(action: {
+                        showingAirportSearch = true
+                    }) {
+                        Text(icao)
+                            .font(.system(size: 24, weight: .bold, design: .monospaced))
+                            .foregroundColor(.blue)
+                    }
+                }
             } else {
                 Text(icao)
                     .font(.system(size: 24, weight: .bold, design: .monospaced))
@@ -38,5 +58,10 @@ struct AirportCard: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(.secondarySystemBackground))
         )
+        .sheet(isPresented: $showingAirportSearch) {
+            AirportSearchSheet(database: database) { selectedIcao in
+                icao = selectedIcao
+            }
+        }
     }
 }

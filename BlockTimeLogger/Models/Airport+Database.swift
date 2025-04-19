@@ -9,9 +9,9 @@ import Foundation
 import GRDB
 
 extension Airport {
-    static let databaseTableName = "airport"
-
     enum Columns: String, ColumnExpression {
-        case id, name, iata, icao
+        case id, name, icao, iata
     }
+    
+    static let databaseTableName = "airports"
 }

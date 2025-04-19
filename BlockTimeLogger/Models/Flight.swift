@@ -3,91 +3,36 @@ import GRDB
 import SwiftUI
 
 struct Flight: Identifiable, Codable {
+    // MARK: - Stored Properties
     var id: UUID
     var flightNumber: String
     private var storedDate: Date
-    var date: Date {
-        get { storedDate }
-        set {
-//            let oldDate = storedDate
-            storedDate = newValue
-            
-            // Get the time components from the current times
-            let calendar = Self.utcCalendar
-            let outComponents = calendar.dateComponents([.hour, .minute], from: outTime)
-            let offComponents = calendar.dateComponents([.hour, .minute], from: offTime)
-            let onComponents = calendar.dateComponents([.hour, .minute], from: onTime)
-            let inComponents = calendar.dateComponents([.hour, .minute], from: inTime)
-            
-            // Create new base date for the times
-            let newBaseDate = calendar.startOfDay(for: newValue)
-            
-            // Create new times on the new date
-            let newOutTime = calendar.date(bySettingHour: outComponents.hour ?? 0,
-                                         minute: outComponents.minute ?? 0,
-                                         second: 0,
-                                         of: newBaseDate)!
-            
-            let newOffTime = calendar.date(bySettingHour: offComponents.hour ?? 0,
-                                         minute: offComponents.minute ?? 0,
-                                         second: 0,
-                                         of: newBaseDate)!
-            
-            let newOnTime = calendar.date(bySettingHour: onComponents.hour ?? 0,
-                                        minute: onComponents.minute ?? 0,
-                                        second: 0,
-                                        of: newBaseDate)!
-            
-            let newInTime = calendar.date(bySettingHour: inComponents.hour ?? 0,
-                                        minute: inComponents.minute ?? 0,
-                                        second: 0,
-                                        of: newBaseDate)!
-            
-            // Set the times
-            self.outTime = newOutTime
-            self.offTime = newOffTime
-            self.onTime = newOnTime
-            self.inTime = newInTime
-            
-            // Check if any time crosses midnight and adjust accordingly
-            if newOffTime < newOutTime {
-                self.offTime = calendar.date(byAdding: .day, value: 1, to: newOffTime)!
-            }
-            
-            if newOnTime < newOffTime {
-                self.onTime = calendar.date(byAdding: .day, value: 1, to: newOnTime)!
-            }
-            
-            if newInTime < newOnTime {
-                self.inTime = calendar.date(byAdding: .day, value: 1, to: newInTime)!
-            }
-        }
-    }
     var aircraftRegistration: String
     var aircraftType: String
+    var operatingCapacity: OperatingCapacity
     var departureAirport: String
     var arrivalAirport: String
-    
     var pilotInCommand: String
     var isSelf: Bool
+    var isPF: Bool
+    var isIFR: Bool
+    var isVFR: Bool
+    var position: Position
+    private var storedOutTime: Date
+    private var storedOffTime: Date
+    private var storedOnTime: Date
+    private var storedInTime: Date
+    var notes: String?
+    var userId: Int64
     
-    var isPF: Bool = false
-    var isIFR: Bool = false
-    var isVFR: Bool = false
-    var position: Position = .firstOfficer
-    var operatingCapacity: OperatingCapacity = .p2
+    // MARK: - Static Properties
+    static let utcCalendar: Calendar = {
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        return calendar
+    }()
     
-    // Timing fields (all in UTC)
-    var outTime: Date // Wheels off chocks
-    var offTime: Date // Wheels up (takeoff)
-    var onTime: Date // Wheels down (landing)
-    var inTime: Date // Wheels on chocks
-    
-    var notes: String = ""
-    var sector: Int { 1 } // Each flight counts as 1 sector
-    
-    var userId: Int
-    
+    // MARK: - Enums
     enum OperatingCapacity: String, CaseIterable, Codable {
         case p1 = "P1"
         case p1us = "P1 U/S"
@@ -116,67 +61,95 @@ struct Flight: Identifiable, Codable {
         }
     }
     
-    // MARK: - Initializer with default values
-
-    init(
-        id: UUID,
-        flightNumber: String,
-        date: Date,
-        aircraftRegistration: String,
-        aircraftType: String,
-        departureAirport: String,
-        arrivalAirport: String,
-        pilotInCommand: String,
-        isSelf: Bool,
-        isPF: Bool = false,
-        isIFR: Bool = false,
-        isVFR: Bool = false,
-        position: Position = .firstOfficer,
-        operatingCapacity: OperatingCapacity = .p2,
-        outTime: Date,
-        offTime: Date,
-        onTime: Date,
-        inTime: Date,
-        notes: String = "",
-        userId: Int
-    ) {
-        self.id = id
-        self.flightNumber = flightNumber
-        self.storedDate = date
-        self.aircraftRegistration = aircraftRegistration
-        self.aircraftType = aircraftType
-        self.departureAirport = departureAirport
-        self.arrivalAirport = arrivalAirport
-        self.pilotInCommand = pilotInCommand
-        self.isSelf = isSelf
-        self.isPF = isPF
-        self.isIFR = isIFR
-        self.isVFR = isVFR
-        self.position = position
-        self.operatingCapacity = operatingCapacity
-        self.outTime = outTime
-        self.offTime = offTime
-        self.onTime = onTime
-        self.inTime = inTime
-        self.notes = notes
-        self.userId = userId
-    }
-    
     enum Position: String, CaseIterable, Codable {
         case captain = "CN"
         case firstOfficer = "FO"
         case secondOfficer = "SO"
     }
     
-    // UTC Calendar setup
-    static var utcCalendar: Calendar {
-        var calendar = Calendar.current
-        calendar.timeZone = TimeZone(identifier: "UTC")!
-        return calendar
+    // MARK: - Computed Properties
+    var date: Date {
+        get { storedDate }
+        set {
+            storedDate = newValue
+            
+            // Get the time components from the current times
+            let calendar = Self.utcCalendar
+            let outComponents = calendar.dateComponents([.hour, .minute], from: storedOutTime)
+            let offComponents = calendar.dateComponents([.hour, .minute], from: storedOffTime)
+            let onComponents = calendar.dateComponents([.hour, .minute], from: storedOnTime)
+            let inComponents = calendar.dateComponents([.hour, .minute], from: storedInTime)
+            
+            // Create new base date for the times
+            let newBaseDate = calendar.startOfDay(for: newValue)
+            
+            // Create new times on the new date
+            let newOutTime = calendar.date(bySettingHour: outComponents.hour ?? 0,
+                                         minute: outComponents.minute ?? 0,
+                                         second: 0,
+                                         of: newBaseDate)!
+            
+            let newOffTime = calendar.date(bySettingHour: offComponents.hour ?? 0,
+                                         minute: offComponents.minute ?? 0,
+                                         second: 0,
+                                         of: newBaseDate)!
+            
+            let newOnTime = calendar.date(bySettingHour: onComponents.hour ?? 0,
+                                        minute: onComponents.minute ?? 0,
+                                        second: 0,
+                                        of: newBaseDate)!
+            
+            let newInTime = calendar.date(bySettingHour: inComponents.hour ?? 0,
+                                        minute: inComponents.minute ?? 0,
+                                        second: 0,
+                                        of: newBaseDate)!
+            
+            // Set the times
+            self.storedOutTime = newOutTime
+            self.storedOffTime = newOffTime
+            self.storedOnTime = newOnTime
+            self.storedInTime = newInTime
+            
+            // Check if any time crosses midnight and adjust accordingly
+            if newOffTime < newOutTime {
+                self.storedOffTime = calendar.date(byAdding: .day, value: 1, to: newOffTime)!
+            }
+            
+            if newOnTime < newOffTime {
+                self.storedOnTime = calendar.date(byAdding: .day, value: 1, to: newOnTime)!
+            }
+            
+            if newInTime < newOnTime {
+                self.storedInTime = calendar.date(byAdding: .day, value: 1, to: newInTime)!
+            }
+        }
     }
     
-    // MARK: - Time Calculations
+    // Time properties with proper getters and setters
+    var outTime: Date {
+        get { storedOutTime }
+        set { storedOutTime = newValue }
+    }
     
+    var offTime: Date {
+        get { storedOffTime }
+        set { storedOffTime = newValue }
+    }
+    
+    var onTime: Date {
+        get { storedOnTime }
+        set { storedOnTime = newValue }
+    }
+    
+    var inTime: Date {
+        get { storedInTime }
+        set { storedInTime = newValue }
+    }
+    
+    // Backward compatibility properties
+    var sector: Int { 1 } // Each flight counts as 1 sector
+    
+    // MARK: - Time Calculations
     var blockTime: TimeInterval {
         let normalized = normalizedTimes()
         return normalized.inTime.timeIntervalSince(normalized.outTime)
@@ -197,12 +170,110 @@ struct Flight: Identifiable, Codable {
         return normalized.inTime.timeIntervalSince(normalized.onTime)
     }
     
+    // MARK: - Formatted Display
+    var formattedDate: String {
+        let formatter = DateFormatter()
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.dateFormat = "dd MMM yyyy"
+        return formatter.string(from: date)
+    }
+    
+    var formattedOutTime: String { formatZuluTime(outTime) }
+    var formattedOffTime: String { formatZuluTime(offTime, reference: outTime) }
+    var formattedOnTime: String { formatZuluTime(onTime, reference: outTime) }
+    var formattedInTime: String { formatZuluTime(inTime, reference: outTime) }
+    
+    var formattedBlockTime: String { formatHoursMinutes(blockTime) }
+    var formattedFlightTime: String { formatHoursMinutes(flightTime) }
+    var formattedTaxiOutTime: String { formatHoursMinutes(taxiOutTime) }
+    var formattedTaxiInTime: String { formatHoursMinutes(taxiInTime) }
+    
+    // MARK: - Tags
+    var tags: [FlightTag] {
+        var tags: [FlightTag] = [.pic]
+            
+        if isPF { tags.append(.pf) }
+        if isIFR { tags.append(.ifr) }
+        if isVFR { tags.append(.vfr) }
+            
+        switch position {
+        case .captain: tags.append(.captain)
+        case .firstOfficer: tags.append(.firstOfficer)
+        case .secondOfficer: tags.append(.secondOfficer)
+        }
+            
+        return tags
+    }
+    
+    // MARK: - Initialization
+    init(
+        id: UUID,
+        flightNumber: String,
+        date: Date,
+        aircraftRegistration: String,
+        aircraftType: String,
+        departureAirport: String,
+        arrivalAirport: String,
+        pilotInCommand: String,
+        isSelf: Bool,
+        isPF: Bool,
+        isIFR: Bool,
+        isVFR: Bool,
+        position: Position,
+        operatingCapacity: OperatingCapacity,
+        outTime: Date,
+        offTime: Date,
+        onTime: Date,
+        inTime: Date,
+        notes: String?,
+        userId: Int64
+    ) {
+        self.id = id
+        self.flightNumber = flightNumber
+        self.storedDate = date
+        self.aircraftRegistration = aircraftRegistration
+        self.aircraftType = aircraftType
+        self.departureAirport = departureAirport
+        self.arrivalAirport = arrivalAirport
+        self.pilotInCommand = pilotInCommand
+        self.isSelf = isSelf
+        self.isPF = isPF
+        self.isIFR = isIFR
+        self.isVFR = isVFR
+        self.position = position
+        self.operatingCapacity = operatingCapacity
+        self.storedOutTime = outTime
+        self.storedOffTime = offTime
+        self.storedOnTime = onTime
+        self.storedInTime = inTime
+        self.notes = notes
+        self.userId = userId
+    }
+    
+    // MARK: - Helper Methods
+    private func formatZuluTime(_ time: Date, reference: Date? = nil) -> String {
+        let formatter = DateFormatter()
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.dateFormat = "HHmm"
+        let timeString = formatter.string(from: time) + "z"
+        
+        if let reference = reference, time < reference {
+            return timeString + " (+1)"
+        }
+        return timeString
+    }
+    
+    private func formatHoursMinutes(_ interval: TimeInterval) -> String {
+        let hours = Int(interval) / 3600
+        let minutes = (Int(interval) % 3600) / 60
+        return String(format: "%d:%02d", hours, minutes)
+    }
+    
     private func adjustedTime(_ time: Date, reference: Date) -> Date {
         time < reference ? time.addingTimeInterval(24 * 3600) : time
     }
     
     // MARK: - Time Normalization
-    
     mutating func normalizeTimes() {
         let normalized = normalizedTimes()
         outTime = normalized.outTime
@@ -257,45 +328,7 @@ struct Flight: Identifiable, Codable {
                              of: date) ?? date
     }
     
-    // MARK: - Formatted Display
-    
-    var formattedDate: String {
-        let formatter = DateFormatter()
-        formatter.timeZone = TimeZone(identifier: "UTC")
-        formatter.dateFormat = "dd MMM yyyy"
-        return formatter.string(from: date)
-    }
-    
-    var formattedOutTime: String { formatZuluTime(outTime) }
-    var formattedOffTime: String { formatZuluTime(offTime, reference: outTime) }
-    var formattedOnTime: String { formatZuluTime(onTime, reference: outTime) }
-    var formattedInTime: String { formatZuluTime(inTime, reference: outTime) }
-    
-    var formattedBlockTime: String { formatHoursMinutes(blockTime) }
-    var formattedFlightTime: String { formatHoursMinutes(flightTime) }
-    var formattedTaxiOutTime: String { formatHoursMinutes(taxiOutTime) }
-    var formattedTaxiInTime: String { formatHoursMinutes(taxiInTime) }
-    
-    private func formatZuluTime(_ time: Date, reference: Date? = nil) -> String {
-        let formatter = DateFormatter()
-        formatter.timeZone = TimeZone(identifier: "UTC")
-        formatter.dateFormat = "HHmm"
-        let timeString = formatter.string(from: time) + "z"
-        
-        if let reference = reference, time < reference {
-            return timeString + " (+1)"
-        }
-        return timeString
-    }
-    
-    private func formatHoursMinutes(_ interval: TimeInterval) -> String {
-        let hours = Int(interval) / 3600
-        let minutes = (Int(interval) % 3600) / 60
-        return String(format: "%d:%02d", hours, minutes)
-    }
-    
     // MARK: - Validation
-    
     func validateTimes() -> Bool {
         let normalized = normalizedTimes()
         
@@ -319,6 +352,7 @@ struct Flight: Identifiable, Codable {
             taxiInDuration >= 0
     }
     
+    // MARK: - Factory Methods
     static func emptyFlight() -> Flight {
         let now = Date()
         return Flight(
@@ -340,27 +374,9 @@ struct Flight: Identifiable, Codable {
             offTime: now.addingTimeInterval(30 * 60),
             onTime: now.addingTimeInterval(2 * 60 * 60),
             inTime: now.addingTimeInterval(2.5 * 60 * 60),
-            notes: "",
+            notes: nil,
             userId: 1
         )
-    }
-    
-    // MARK: - Tags
-    
-    var tags: [FlightTag] {
-        var tags: [FlightTag] = [.pic]
-            
-        if isPF { tags.append(.pf) }
-        if isIFR { tags.append(.ifr) }
-        if isVFR { tags.append(.vfr) }
-            
-        switch position {
-        case .captain: tags.append(.captain)
-        case .firstOfficer: tags.append(.firstOfficer)
-        case .secondOfficer: tags.append(.secondOfficer)
-        }
-            
-        return tags
     }
 }
 
@@ -397,25 +413,26 @@ extension Flight: PersistableRecord {
     // MARK: - Row Decoding
     
     init(row: Row) {
-        id = row[Columns.id]
-        flightNumber = row[Columns.flightNumber]
-        storedDate = row[Columns.date]
-        aircraftRegistration = row[Columns.aircraftRegistration]
-        aircraftType = row[Columns.aircraftType]
-        departureAirport = row[Columns.departureAirport]
-        arrivalAirport = row[Columns.arrivalAirport]
-        pilotInCommand = row[Columns.pilotInCommand]
-        isSelf = row[Columns.isSelf]
-        isPF = row[Columns.isPF]
-        isIFR = row[Columns.isIFR]
-        isVFR = row[Columns.isVFR]
-        position = Position(rawValue: row[Columns.position]) ?? .firstOfficer
-        operatingCapacity = OperatingCapacity(rawValue: row[Columns.operatingCapacity]) ?? .p2
-        outTime = row[Columns.outTime]
-        offTime = row[Columns.offTime]
-        onTime = row[Columns.onTime]
-        inTime = row[Columns.inTime]
-        notes = row[Columns.notes]
-        userId = row[Columns.userId]
+        // Initialize all stored properties first
+        self.id = row[Columns.id]
+        self.flightNumber = row[Columns.flightNumber]
+        self.storedDate = row[Columns.date]
+        self.aircraftRegistration = row[Columns.aircraftRegistration]
+        self.aircraftType = row[Columns.aircraftType]
+        self.departureAirport = row[Columns.departureAirport]
+        self.arrivalAirport = row[Columns.arrivalAirport]
+        self.pilotInCommand = row[Columns.pilotInCommand]
+        self.isSelf = row[Columns.isSelf]
+        self.isPF = row[Columns.isPF]
+        self.isIFR = row[Columns.isIFR]
+        self.isVFR = row[Columns.isVFR]
+        self.position = Position(rawValue: row[Columns.position]) ?? .firstOfficer
+        self.operatingCapacity = OperatingCapacity(rawValue: row[Columns.operatingCapacity]) ?? .p2
+        self.storedOutTime = row[Columns.outTime]
+        self.storedOffTime = row[Columns.offTime]
+        self.storedOnTime = row[Columns.onTime]
+        self.storedInTime = row[Columns.inTime]
+        self.notes = row[Columns.notes]
+        self.userId = row[Columns.userId]
     }
 }
