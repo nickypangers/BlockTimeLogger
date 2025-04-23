@@ -26,7 +26,7 @@ struct AirportCard: View {
                         showingAirportSearch = true
                     }) {
                         HStack {
-                            Text("Select")
+                            Text("-")
                                 .font(.system(size: 24, weight: .bold, design: .monospaced))
                                 .foregroundColor(.blue)
                             Image(systemName: "chevron.down")
