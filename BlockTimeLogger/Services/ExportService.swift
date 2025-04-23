@@ -190,7 +190,7 @@ class ExportService {
                         width: columnWidths[index] - (cellPadding * 2),
                         height: maxHeaderHeight - (cellPadding * 2)
                     )
-                    header.draw(in: headerRect, withAttributes: textAttributes)
+                    (header as NSString).draw(in: headerRect, withAttributes: textAttributes)
                     xPosition += columnWidths[index] + columnSpacing
                 }
                 
@@ -222,7 +222,7 @@ class ExportService {
                                 width: columnWidths[index] - (cellPadding * 2),
                                 height: maxHeaderHeight - (cellPadding * 2)
                             )
-                            header.draw(in: headerRect, withAttributes: textAttributes)
+                            (header as NSString).draw(in: headerRect, withAttributes: textAttributes)
                             xPosition += columnWidths[index] + columnSpacing
                         }
                         
@@ -259,7 +259,8 @@ class ExportService {
                             width: columnWidths[index] - (cellPadding * 2),
                             height: rowHeight - (cellPadding * 2)
                         )
-                        entry.draw(in: entryRect, withAttributes: textAttributes)
+                        let entryString = String(describing: entry)
+                        (entryString as NSString).draw(in: entryRect, withAttributes: textAttributes)
                         xPosition += columnWidths[index] + columnSpacing
                     }
                     
@@ -292,7 +293,7 @@ class ExportService {
                             width: columnWidths[index] - (cellPadding * 2),
                             height: maxHeaderHeight - (cellPadding * 2)
                         )
-                        header.draw(in: headerRect, withAttributes: textAttributes)
+                        (header as NSString).draw(in: headerRect, withAttributes: textAttributes)
                         xPosition += columnWidths[index] + columnSpacing
                     }
                     
@@ -326,7 +327,7 @@ class ExportService {
                         width: columnWidths[index] - (cellPadding * 2),
                         height: rowHeight - (cellPadding * 2)
                     )
-                    entry.draw(in: entryRect, withAttributes: textAttributes)
+                    (entry as NSString).draw(in: entryRect, withAttributes: textAttributes)
                     xPosition += columnWidths[index] + columnSpacing
                 }
                 
@@ -347,7 +348,7 @@ class ExportService {
                         width: columnWidths[index] - (cellPadding * 2),
                         height: rowHeight - (cellPadding * 2)
                     )
-                    entry.draw(in: entryRect, withAttributes: textAttributes)
+                    (entry as NSString).draw(in: entryRect, withAttributes: textAttributes)
                     xPosition += columnWidths[index] + columnSpacing
                 }
             }

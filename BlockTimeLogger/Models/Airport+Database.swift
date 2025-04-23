@@ -12,6 +12,6 @@ extension Airport {
     enum Columns: String, ColumnExpression {
         case id, name, icao, iata
     }
-    
-    static let databaseTableName = "airports"
+
+    static let databaseTableName = "airport"
 }

@@ -4,18 +4,18 @@ struct AirportSearchSheet: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel: AirportSearchViewModel
     @State private var searchText = ""
-    let onSelect: (String) -> Void
-    
-    init(database: LocalDatabase, onSelect: @escaping (String) -> Void) {
+    let onSelect: (Airport) -> Void
+
+    init(database: LocalDatabase, onSelect: @escaping (Airport) -> Void) {
         _viewModel = StateObject(wrappedValue: AirportSearchViewModel(database: database))
         self.onSelect = onSelect
     }
-    
+
     var body: some View {
         NavigationView {
             List(viewModel.filteredAirports) { airport in
                 Button(action: {
-                    onSelect(airport.icao)
+                    onSelect(airport)
                     dismiss()
                 }) {
                     VStack(alignment: .leading) {
@@ -42,4 +42,4 @@ struct AirportSearchSheet: View {
             }
         }
     }
-} 
+}

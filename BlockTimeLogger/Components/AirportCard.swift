@@ -8,7 +8,7 @@ import SwiftUI
 
 struct AirportCard: View {
     let type: String
-    @Binding var icao: String
+    @Binding var airport: Airport?
     let time: String
     let isEditing: Bool
     let database: LocalDatabase
@@ -21,7 +21,7 @@ struct AirportCard: View {
                 .foregroundColor(.secondary)
 
             if isEditing {
-                if icao.isEmpty {
+                if airport == nil {
                     Button(action: {
                         showingAirportSearch = true
                     }) {
@@ -38,13 +38,13 @@ struct AirportCard: View {
                     Button(action: {
                         showingAirportSearch = true
                     }) {
-                        Text(icao)
+                        Text(airport == nil ? "Airport not found" : airport!.icao)
                             .font(.system(size: 24, weight: .bold, design: .monospaced))
                             .foregroundColor(.blue)
                     }
                 }
             } else {
-                Text(icao)
+                Text(airport == nil ? "Airport not found" : airport!.icao)
                     .font(.system(size: 24, weight: .bold, design: .monospaced))
             }
 
@@ -59,8 +59,8 @@ struct AirportCard: View {
                 .fill(Color(.secondarySystemBackground))
         )
         .sheet(isPresented: $showingAirportSearch) {
-            AirportSearchSheet(database: database) { selectedIcao in
-                icao = selectedIcao
+            AirportSearchSheet(database: database) { selectedAirport in
+                airport = selectedAirport
             }
         }
     }

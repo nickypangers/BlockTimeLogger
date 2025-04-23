@@ -122,6 +122,7 @@ extension LocalDatabase {
             // Convert to Airport objects and import them
             var successCount = 0
             var totalCount = 0
+            var currentId = 1
             
             for (_, airportData) in json {
                 let name = airportData["name"] as? String ?? ""
@@ -131,7 +132,8 @@ extension LocalDatabase {
                 // Only process airports with valid ICAO codes and non-empty IATA codes
                 if !icao.isEmpty, !iata.isEmpty {
                     totalCount += 1
-                    let airport = Airport(name: name, icao: icao, iata: iata)
+                    let airport = Airport(id: currentId, name: name, icao: icao, iata: iata)
+                    currentId += 1
                     
                     do {
                         try createAirport(airport)
@@ -157,21 +159,12 @@ extension LocalDatabase {
         // Create a publisher that observes the database for changes
         return ValueObservation
             .tracking { db in
-                var flights = try Flight.order(Flight.Columns.outTime.desc).fetchAll(db)
-                
-                // Load airport ICAOs for each flight
-                for i in 0..<flights.count {
-                    let departureIcao = try String.fetchOne(db, sql: Flight.departureAirportQuery(), arguments: [flights[i].id]) ?? ""
-                    let arrivalIcao = try String.fetchOne(db, sql: Flight.arrivalAirportQuery(), arguments: [flights[i].id]) ?? ""
-                    
-                    // Create a new flight with the loaded ICAOs
-                    var flight = flights[i]
-                    flight.departureAirport = departureIcao
-                    flight.arrivalAirport = arrivalIcao
-                    flights[i] = flight
-                }
-                
-                return flights
+                try Flight
+                    .including(required: Flight.belongsTo(Airport.self, key: "departureAirport", using: ForeignKey(["departureAirportId"])))
+                    .including(required: Flight.belongsTo(Airport.self, key: "arrivalAirport", using: ForeignKey(["arrivalAirportId"])))
+                    .order(Flight.Columns.outTime.desc)
+                    .asRequest(of: Flight.self)
+                    .fetchAll(db)
             }
             .publisher(in: reader)
             .catch { error -> AnyPublisher<[Flight], Never> in
@@ -202,21 +195,12 @@ extension LocalDatabase {
     func getFlights() -> [Flight] {
         do {
             return try reader.read { db in
-                var flights = try Flight.order(Flight.Columns.outTime.desc).fetchAll(db)
-                
-                // Load airport ICAOs for each flight
-                for i in 0..<flights.count {
-                    let departureIcao = try String.fetchOne(db, sql: Flight.departureAirportQuery(), arguments: [flights[i].id]) ?? ""
-                    let arrivalIcao = try String.fetchOne(db, sql: Flight.arrivalAirportQuery(), arguments: [flights[i].id]) ?? ""
-                    
-                    // Create a new flight with the loaded ICAOs
-                    var flight = flights[i]
-                    flight.departureAirport = departureIcao
-                    flight.arrivalAirport = arrivalIcao
-                    flights[i] = flight
-                }
-                
-                return flights
+                try Flight
+                    .including(required: Flight.belongsTo(Airport.self, key: "departureAirport", using: ForeignKey(["departureAirportId"])))
+                    .including(required: Flight.belongsTo(Airport.self, key: "arrivalAirport", using: ForeignKey(["arrivalAirportId"])))
+                    .order(Flight.Columns.outTime.desc)
+                    .asRequest(of: Flight.self)
+                    .fetchAll(db)
             }
         } catch {
             print("LocalDatabase: Error fetching flights: \(error)")

@@ -20,7 +20,7 @@ struct NewFlightView: View {
                     FlightHeaderSection(flight: $viewModel.flight, isEditing: true)
 //                    aircraftSection()
                     FlightAircraftSection(flight: $viewModel.flight, isEditing: true)
-                    FlightAirportSection(flight: $viewModel.flight, isEditing: true)
+                    FlightAirportSection(flight: $viewModel.flight, isEditing: true, database: LocalDatabase.shared)
 //                    timelineSection()
                     FlightTimelineSection(flight: $viewModel.flight, isEditing: true) {
                         event in
@@ -53,7 +53,11 @@ struct NewFlightView: View {
             {
                 Button("OK", role: .cancel) {}
             } message: {
-                Text("Please check all required fields are completed and times are in the correct sequence (OUT → OFF → ON → IN).")
+                if let error = viewModel.validationError {
+                    Text(error.localizedDescription)
+                } else {
+                    Text("Please check all required fields are completed and times are in the correct sequence (OUT → OFF → ON → IN).")
+                }
             }
         }
     }

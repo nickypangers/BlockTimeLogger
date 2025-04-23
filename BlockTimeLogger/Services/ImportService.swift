@@ -79,8 +79,13 @@ class ImportService {
             flight.id = UUID()
             flight.date = date
             flight.flightNumber = components[1]
-            flight.departureAirport = components[2]
-            flight.arrivalAirport = components[3]
+            
+            // Get airport IDs from ICAO codes
+            let departureAirport = LocalDatabase.shared.getAirportByICAO(components[2])
+            let arrivalAirport = LocalDatabase.shared.getAirportByICAO(components[3])
+            
+            flight.departureAirportId = departureAirport?.id ?? 0
+            flight.arrivalAirportId = arrivalAirport?.id ?? 0
             flight.aircraftRegistration = components[4]
             flight.aircraftType = "B77W" // Default aircraft type
             

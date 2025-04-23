@@ -10,6 +10,7 @@ import SwiftUI
 final class NewFlightViewModel: ObservableObject {
     @Published var flight: Flight
     @Published var showValidationAlert = false
+    @Published var validationError: ValidationError?
     @Published var activePicker: PickerType?
     
     // Time entry fields (HHmm format)
@@ -25,11 +26,58 @@ final class NewFlightViewModel: ObservableObject {
         var id: Self { self }
     }
     
+    enum ValidationError: LocalizedError {
+        case missingFlightNumber
+        case missingAircraftRegistration
+        case missingAircraftType
+        case missingDepartureAirport
+        case missingArrivalAirport
+        case missingPilotInCommand
+        case invalidTimeSequence
+        case invalidTimeFormat
+        case invalidBlockTime
+        case invalidFlightTime
+        case invalidTaxiTime
+        
+        var errorDescription: String? {
+            switch self {
+            case .missingFlightNumber:
+                return "Flight number is required"
+            case .missingAircraftRegistration:
+                return "Aircraft registration is required"
+            case .missingAircraftType:
+                return "Aircraft type is required"
+            case .missingDepartureAirport:
+                return "Departure airport is required"
+            case .missingArrivalAirport:
+                return "Arrival airport is required"
+            case .missingPilotInCommand:
+                return "Pilot in Command name is required when not self"
+            case .invalidTimeSequence:
+                return "Times must follow: OUT → OFF → ON → IN"
+            case .invalidTimeFormat:
+                return "Time must be in HHmm format (e.g., 1230z)"
+            case .invalidBlockTime:
+                return "Block time must be at least 1 minute"
+            case .invalidFlightTime:
+                return "Flight time must be at least 1 minute"
+            case .invalidTaxiTime:
+                return "Taxi times cannot be negative"
+            }
+        }
+    }
+    
     private let flightDataService: FlightDataServiceProtocol
     
     init(flightDataService: FlightDataServiceProtocol = FlightDataService.shared) {
         self.flightDataService = flightDataService
         self.flight = Flight.emptyFlight()
+        
+        // Initialize entered times with formatted times from the flight
+        self.enteredOutTime = flight.formattedOutTime
+        self.enteredOffTime = flight.formattedOffTime
+        self.enteredOnTime = flight.formattedOnTime
+        self.enteredInTime = flight.formattedInTime
     }
     
     func saveFlight() -> Bool {
@@ -45,8 +93,9 @@ final class NewFlightViewModel: ObservableObject {
         
         print("NewFlightViewModel: Flight before saving: \(flight)")
         
-        guard validateFlight() else {
-            print("NewFlightViewModel: Flight validation failed")
+        if let error = validateFlight() {
+            print("NewFlightViewModel: Flight validation failed: \(error.localizedDescription)")
+            validationError = error
             showValidationAlert = true
             return false
         }
@@ -127,24 +176,86 @@ final class NewFlightViewModel: ObservableObject {
         return (hour, minute)
     }
     
-    private func validateFlight() -> Bool {
-        // Required fields
-        guard !flight.flightNumber.isEmpty,
-              !flight.aircraftRegistration.isEmpty,
-              !flight.aircraftType.isEmpty,
-              !flight.departureAirport.isEmpty,
-              !flight.arrivalAirport.isEmpty
-        else {
-            return false
+    private func validateFlight() -> ValidationError? {
+        // Required fields validation
+        if flight.flightNumber.isEmpty {
+            return .missingFlightNumber
         }
-        
-        // PIC validation
+        if flight.aircraftRegistration.isEmpty {
+            return .missingAircraftRegistration
+        }
+        if flight.aircraftType.isEmpty {
+            return .missingAircraftType
+        }
+        if flight.departureAirportId == 0 {
+            return .missingDepartureAirport
+        }
+        if flight.arrivalAirportId == 0 {
+            return .missingArrivalAirport
+        }
         if !flight.isSelf && flight.pilotInCommand.isEmpty {
+            return .missingPilotInCommand
+        }
+
+        print("enteredOutTime: \(enteredOutTime)")
+        print("enteredOffTime: \(enteredOffTime)")
+        print("enteredOnTime: \(enteredOnTime)")
+        print("enteredInTime: \(enteredInTime)")
+        
+        // Time format validation
+        if !isValidTimeFormat(enteredOutTime) ||
+           !isValidTimeFormat(enteredOffTime) ||
+           !isValidTimeFormat(enteredOnTime) ||
+           !isValidTimeFormat(enteredInTime) {
+            return .invalidTimeFormat
+        }
+        
+        // Time sequence validation
+        let normalized = flight.normalizedTimes()
+        if normalized.outTime > normalized.offTime ||
+           normalized.offTime > normalized.onTime ||
+           normalized.onTime > normalized.inTime {
+            return .invalidTimeSequence
+        }
+        
+        // Duration validation
+        let blockDuration = normalized.inTime.timeIntervalSince(normalized.outTime)
+        let flightDuration = normalized.onTime.timeIntervalSince(normalized.offTime)
+        let taxiOutDuration = normalized.offTime.timeIntervalSince(normalized.outTime)
+        let taxiInDuration = normalized.inTime.timeIntervalSince(normalized.onTime)
+        
+        if blockDuration < 60 {
+            return .invalidBlockTime
+        }
+        if flightDuration < 60 {
+            return .invalidFlightTime
+        }
+        if taxiOutDuration < 0 || taxiInDuration < 0 {
+            return .invalidTaxiTime
+        }
+        
+        return nil
+    }
+    
+    private func isValidTimeFormat(_ timeString: String) -> Bool {
+        // Remove z suffix and (+1) notation
+        let cleaned = timeString.replacingOccurrences(of: "z", with: "")
+            .replacingOccurrences(of: "(+1)", with: "")
+            .trimmingCharacters(in: .whitespaces)
+        
+        // Check if we have exactly 4 digits
+        guard cleaned.count == 4 else {
             return false
         }
         
-        // Time validation
-        return flight.validateTimes()
+        // Try to parse hours and minutes
+        guard let hour = Int(cleaned.prefix(2)),
+              let minute = Int(cleaned.suffix(2)) else {
+            return false
+        }
+        
+        // Validate hours (0-23) and minutes (0-59)
+        return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59
     }
     
     var activePickerBinding: Binding<Date>? {

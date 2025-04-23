@@ -22,7 +22,7 @@ struct FlightDetailView: View {
             VStack(spacing: 20) {
                 FlightHeaderSection(flight: $viewModel.draftFlight, isEditing: viewModel.isEditing)
                 FlightAircraftSection(flight: $viewModel.draftFlight, isEditing: viewModel.isEditing)
-                FlightAirportSection(flight: $viewModel.draftFlight, isEditing: viewModel.isEditing)
+                FlightAirportSection(flight: $viewModel.draftFlight, isEditing: viewModel.isEditing, database: LocalDatabase.shared)
                 FlightTimelineSection(
                     flight: $viewModel.draftFlight,
                     isEditing: viewModel.isEditing

@@ -176,8 +176,8 @@ struct FlightListView: View {
         // Apply search filter
         if !searchText.isEmpty {
             result = result.filter { flight in
-                flight.departureAirport.localizedCaseInsensitiveContains(searchText) ||
-                    flight.arrivalAirport.localizedCaseInsensitiveContains(searchText) ||
+                flight.departureAirportICAO.localizedCaseInsensitiveContains(searchText) ||
+                    flight.arrivalAirportICAO.localizedCaseInsensitiveContains(searchText) ||
                     flight.aircraftType.localizedCaseInsensitiveContains(searchText)
             }
         }
@@ -252,7 +252,7 @@ struct FlightRow: View {
             // Route column
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 8) {
-                    Text(flight.departureAirport)
+                    Text(flight.departureAirportICAO)
                         .font(.system(.body, design: .monospaced))
                         .bold()
                     
@@ -261,7 +261,7 @@ struct FlightRow: View {
                         .foregroundColor(.secondary)
                         .rotationEffect(.degrees(90))
                     
-                    Text(flight.arrivalAirport)
+                    Text(flight.arrivalAirportICAO)
                         .font(.system(.body, design: .monospaced))
                         .bold()
                 }

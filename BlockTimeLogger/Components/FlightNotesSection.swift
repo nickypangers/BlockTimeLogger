@@ -27,7 +27,7 @@ struct FlightNotesSection: View {
                 .onAppear {
                     notesText = flight.notes ?? ""
                 }
-                .onChange(of: notesText) { newValue in
+                .onChange(of: notesText) { _, newValue in
                     flight.notes = newValue.isEmpty ? nil : newValue
                 }
         }

@@ -1,13 +1,13 @@
 import Foundation
 import GRDB
 
-struct Airport: Identifiable, Codable {
-    var id: UUID
+struct Airport: Identifiable, Codable, Equatable {
+    var id: Int
     var name: String
     var icao: String
     var iata: String
 
-    init(id: UUID = UUID(), name: String, icao: String, iata: String) {
+    init(id: Int = 0, name: String, icao: String, iata: String) {
         self.id = id
         self.name = name
         self.icao = icao

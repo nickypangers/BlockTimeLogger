@@ -84,8 +84,8 @@ class FlightDataService: FlightDataServiceProtocol {
                 date: date,
                 aircraftRegistration: aircraftReg,
                 aircraftType: aircraftType,
-                departureAirport: departureAirport,
-                arrivalAirport: arrivalAirport,
+                departureAirportId: 1, // Using integer IDs starting from 1
+                arrivalAirportId: 2,
                 pilotInCommand: pilotInCommand,
                 isSelf: Bool.random(),
                 isPF: isPF,

@@ -35,7 +35,7 @@ struct FlightLogOverview: View {
             // Main flight info
             HStack(alignment: .top) {
                 VStack(alignment: .leading) {
-                    Text(flight.departureAirport)
+                    Text(flight.departureAirportICAO)
                         .font(.title2)
                         .bold()
                     Text(flight.formattedOutTime)
@@ -57,7 +57,7 @@ struct FlightLogOverview: View {
                 Spacer()
                 
                 VStack(alignment: .trailing) {
-                    Text(flight.arrivalAirport)
+                    Text(flight.arrivalAirportICAO)
                         .font(.title2)
                         .bold()
                     Text(flight.formattedInTime)

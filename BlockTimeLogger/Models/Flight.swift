@@ -4,14 +4,15 @@ import SwiftUI
 
 struct Flight: Identifiable, Codable {
     // MARK: - Stored Properties
+
     var id: UUID
     var flightNumber: String
-    private var storedDate: Date
+    var date: Date
     var aircraftRegistration: String
     var aircraftType: String
     var operatingCapacity: OperatingCapacity
-    var departureAirport: String
-    var arrivalAirport: String
+    var departureAirportId: Int
+    var arrivalAirportId: Int
     var pilotInCommand: String
     var isSelf: Bool
     var isPF: Bool
@@ -25,7 +26,13 @@ struct Flight: Identifiable, Codable {
     var notes: String?
     var userId: Int64
     
+    // MARK: - Relationships
+    
+    var departureAirport: Airport?
+    var arrivalAirport: Airport?
+    
     // MARK: - Static Properties
+
     static let utcCalendar: Calendar = {
         var calendar = Calendar.current
         calendar.timeZone = TimeZone(secondsFromGMT: 0)!
@@ -33,6 +40,7 @@ struct Flight: Identifiable, Codable {
     }()
     
     // MARK: - Enums
+
     enum OperatingCapacity: String, CaseIterable, Codable {
         case p1 = "P1"
         case p1us = "P1 U/S"
@@ -68,63 +76,7 @@ struct Flight: Identifiable, Codable {
     }
     
     // MARK: - Computed Properties
-    var date: Date {
-        get { storedDate }
-        set {
-            storedDate = newValue
-            
-            // Get the time components from the current times
-            let calendar = Self.utcCalendar
-            let outComponents = calendar.dateComponents([.hour, .minute], from: storedOutTime)
-            let offComponents = calendar.dateComponents([.hour, .minute], from: storedOffTime)
-            let onComponents = calendar.dateComponents([.hour, .minute], from: storedOnTime)
-            let inComponents = calendar.dateComponents([.hour, .minute], from: storedInTime)
-            
-            // Create new base date for the times
-            let newBaseDate = calendar.startOfDay(for: newValue)
-            
-            // Create new times on the new date
-            let newOutTime = calendar.date(bySettingHour: outComponents.hour ?? 0,
-                                         minute: outComponents.minute ?? 0,
-                                         second: 0,
-                                         of: newBaseDate)!
-            
-            let newOffTime = calendar.date(bySettingHour: offComponents.hour ?? 0,
-                                         minute: offComponents.minute ?? 0,
-                                         second: 0,
-                                         of: newBaseDate)!
-            
-            let newOnTime = calendar.date(bySettingHour: onComponents.hour ?? 0,
-                                        minute: onComponents.minute ?? 0,
-                                        second: 0,
-                                        of: newBaseDate)!
-            
-            let newInTime = calendar.date(bySettingHour: inComponents.hour ?? 0,
-                                        minute: inComponents.minute ?? 0,
-                                        second: 0,
-                                        of: newBaseDate)!
-            
-            // Set the times
-            self.storedOutTime = newOutTime
-            self.storedOffTime = newOffTime
-            self.storedOnTime = newOnTime
-            self.storedInTime = newInTime
-            
-            // Check if any time crosses midnight and adjust accordingly
-            if newOffTime < newOutTime {
-                self.storedOffTime = calendar.date(byAdding: .day, value: 1, to: newOffTime)!
-            }
-            
-            if newOnTime < newOffTime {
-                self.storedOnTime = calendar.date(byAdding: .day, value: 1, to: newOnTime)!
-            }
-            
-            if newInTime < newOnTime {
-                self.storedInTime = calendar.date(byAdding: .day, value: 1, to: newInTime)!
-            }
-        }
-    }
-    
+
     // Time properties with proper getters and setters
     var outTime: Date {
         get { storedOutTime }
@@ -146,10 +98,35 @@ struct Flight: Identifiable, Codable {
         set { storedInTime = newValue }
     }
     
-    // Backward compatibility properties
+//    // Backward compatibility properties
+//    var departureAirport: String {
+//        get {
+//            // This will be replaced with a join query in the database layer
+//            return ""
+//        }
+//        set { } // No-op for backward compatibility
+//    }
+//
+//    var arrivalAirport: String {
+//        get {
+//            // This will be replaced with a join query in the database layer
+//            return ""
+//        }
+//        set { } // No-op for backward compatibility
+//    }
+    
     var sector: Int { 1 } // Each flight counts as 1 sector
     
+    var departureAirportICAO: String {
+        departureAirport?.icao ?? ""
+    }
+    
+    var arrivalAirportICAO: String {
+        arrivalAirport?.icao ?? ""
+    }
+    
     // MARK: - Time Calculations
+
     var blockTime: TimeInterval {
         let normalized = normalizedTimes()
         return normalized.inTime.timeIntervalSince(normalized.outTime)
@@ -171,6 +148,7 @@ struct Flight: Identifiable, Codable {
     }
     
     // MARK: - Formatted Display
+
     var formattedDate: String {
         let formatter = DateFormatter()
         formatter.timeZone = TimeZone(identifier: "UTC")
@@ -189,6 +167,7 @@ struct Flight: Identifiable, Codable {
     var formattedTaxiInTime: String { formatHoursMinutes(taxiInTime) }
     
     // MARK: - Tags
+
     var tags: [FlightTag] {
         var tags: [FlightTag] = [.pic]
             
@@ -206,14 +185,15 @@ struct Flight: Identifiable, Codable {
     }
     
     // MARK: - Initialization
+
     init(
         id: UUID,
         flightNumber: String,
         date: Date,
         aircraftRegistration: String,
         aircraftType: String,
-        departureAirport: String,
-        arrivalAirport: String,
+        departureAirportId: Int,
+        arrivalAirportId: Int,
         pilotInCommand: String,
         isSelf: Bool,
         isPF: Bool,
@@ -230,11 +210,11 @@ struct Flight: Identifiable, Codable {
     ) {
         self.id = id
         self.flightNumber = flightNumber
-        self.storedDate = date
+        self.date = date
         self.aircraftRegistration = aircraftRegistration
         self.aircraftType = aircraftType
-        self.departureAirport = departureAirport
-        self.arrivalAirport = arrivalAirport
+        self.departureAirportId = departureAirportId
+        self.arrivalAirportId = arrivalAirportId
         self.pilotInCommand = pilotInCommand
         self.isSelf = isSelf
         self.isPF = isPF
@@ -251,6 +231,7 @@ struct Flight: Identifiable, Codable {
     }
     
     // MARK: - Helper Methods
+
     private func formatZuluTime(_ time: Date, reference: Date? = nil) -> String {
         let formatter = DateFormatter()
         formatter.timeZone = TimeZone(identifier: "UTC")
@@ -274,6 +255,7 @@ struct Flight: Identifiable, Codable {
     }
     
     // MARK: - Time Normalization
+
     mutating func normalizeTimes() {
         let normalized = normalizedTimes()
         outTime = normalized.outTime
@@ -329,6 +311,7 @@ struct Flight: Identifiable, Codable {
     }
     
     // MARK: - Validation
+
     func validateTimes() -> Bool {
         let normalized = normalizedTimes()
         
@@ -353,6 +336,7 @@ struct Flight: Identifiable, Codable {
     }
     
     // MARK: - Factory Methods
+
     static func emptyFlight() -> Flight {
         let now = Date()
         return Flight(
@@ -361,8 +345,8 @@ struct Flight: Identifiable, Codable {
             date: Self.utcCalendar.startOfDay(for: now),
             aircraftRegistration: "",
             aircraftType: "",
-            departureAirport: "",
-            arrivalAirport: "",
+            departureAirportId: 0,
+            arrivalAirportId: 0,
             pilotInCommand: "",
             isSelf: true,
             isPF: false,
@@ -382,7 +366,10 @@ struct Flight: Identifiable, Codable {
 
 extension Flight: EncodableRecord, FetchableRecord {}
 
-extension Flight: TableRecord {}
+extension Flight: TableRecord {
+    static let departureAirport = belongsTo(Airport.self, key: "departureAirport", using: ForeignKey(["departureAirportId"]))
+    static let arrivalAirport = belongsTo(Airport.self, key: "arrivalAirport", using: ForeignKey(["arrivalAirportId"]))
+}
 
 extension Flight: PersistableRecord {
     // MARK: - PersistableRecord conformance
@@ -390,11 +377,11 @@ extension Flight: PersistableRecord {
     func encode(to container: inout PersistenceContainer) {
         container[Columns.id] = id
         container[Columns.flightNumber] = flightNumber
-        container[Columns.date] = storedDate
+        container[Columns.date] = date
         container[Columns.aircraftRegistration] = aircraftRegistration
         container[Columns.aircraftType] = aircraftType
-        container[Columns.departureAirport] = departureAirport
-        container[Columns.arrivalAirport] = arrivalAirport
+        container[Columns.departureAirportId] = departureAirportId
+        container[Columns.arrivalAirportId] = arrivalAirportId
         container[Columns.pilotInCommand] = pilotInCommand
         container[Columns.isSelf] = isSelf
         container[Columns.isPF] = isPF
@@ -416,11 +403,11 @@ extension Flight: PersistableRecord {
         // Initialize all stored properties first
         self.id = row[Columns.id]
         self.flightNumber = row[Columns.flightNumber]
-        self.storedDate = row[Columns.date]
+        self.date = row[Columns.date]
         self.aircraftRegistration = row[Columns.aircraftRegistration]
         self.aircraftType = row[Columns.aircraftType]
-        self.departureAirport = row[Columns.departureAirport]
-        self.arrivalAirport = row[Columns.arrivalAirport]
+        self.departureAirportId = row[Columns.departureAirportId]
+        self.arrivalAirportId = row[Columns.arrivalAirportId]
         self.pilotInCommand = row[Columns.pilotInCommand]
         self.isSelf = row[Columns.isSelf]
         self.isPF = row[Columns.isPF]
@@ -434,5 +421,9 @@ extension Flight: PersistableRecord {
         self.storedInTime = row[Columns.inTime]
         self.notes = row[Columns.notes]
         self.userId = row[Columns.userId]
+        
+        // Initialize relationships
+        self.departureAirport = row["departureAirport"]
+        self.arrivalAirport = row["arrivalAirport"]
     }
 }

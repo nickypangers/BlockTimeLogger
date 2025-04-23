@@ -12,11 +12,11 @@ extension Flight {
     enum Columns: String, ColumnExpression {
         case id
         case flightNumber
-        case date = "storedDate"
+        case date
         case aircraftRegistration
         case aircraftType
-        case departureAirport
-        case arrivalAirport
+        case departureAirportId
+        case arrivalAirportId
         case pilotInCommand
         case isSelf
         case isPF
@@ -24,10 +24,10 @@ extension Flight {
         case isVFR
         case position
         case operatingCapacity
-        case outTime = "storedOutTime"
-        case offTime = "storedOffTime"
-        case onTime = "storedOnTime"
-        case inTime = "storedInTime"
+        case outTime
+        case offTime
+        case onTime
+        case inTime
         case notes
         case userId
     }
@@ -39,7 +39,7 @@ extension Flight {
         """
         SELECT a.icao
         FROM \(databaseTableName) f
-        JOIN \(Airport.databaseTableName) a ON a.id = f.\(Columns.departureAirport)
+        JOIN \(Airport.databaseTableName) a ON a.id = f.\(Columns.departureAirportId)
         WHERE f.id = ?
         """
     }
@@ -49,7 +49,7 @@ extension Flight {
         """
         SELECT a.icao
         FROM \(databaseTableName) f
-        JOIN \(Airport.databaseTableName) a ON a.id = f.\(Columns.arrivalAirport)
+        JOIN \(Airport.databaseTableName) a ON a.id = f.\(Columns.arrivalAirportId)
         WHERE f.id = ?
         """
     }

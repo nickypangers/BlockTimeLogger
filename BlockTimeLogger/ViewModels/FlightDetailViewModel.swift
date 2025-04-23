@@ -50,15 +50,25 @@ final class FlightDetailViewModel: ObservableObject {
     }
     
     func saveFlight() -> Bool {
-        if validateTimes() {
+        if validateTimes() && validateAirports() {
             isEditing = false
             do {
+                // Update the flight in the database
                 try db.updateFlight(draftFlight)
+                
+                // Update airport relationships
+                if let departureAirport = draftFlight.departureAirport {
+                    draftFlight.departureAirportId = departureAirport.id
+                }
+                if let arrivalAirport = draftFlight.arrivalAirport {
+                    draftFlight.arrivalAirportId = arrivalAirport.id
+                }
+                
+                return true
             } catch {
                 print("Error updating flight \(draftFlight.id): \(error)")
                 return false
             }
-            return true
         } else {
             showValidationAlert = true
             return false
@@ -125,5 +135,16 @@ final class FlightDetailViewModel: ObservableObject {
         return draftFlight.outTime <= draftFlight.offTime &&
             draftFlight.offTime <= draftFlight.onTime &&
             draftFlight.onTime <= draftFlight.inTime
+    }
+    
+    private func validateAirports() -> Bool {
+        // Ensure both departure and arrival airports are set
+        guard draftFlight.departureAirportId != 0,
+              draftFlight.arrivalAirportId != 0 else {
+            return false
+        }
+        
+        // Ensure departure and arrival airports are different
+        return draftFlight.departureAirportId != draftFlight.arrivalAirportId
     }
 }
