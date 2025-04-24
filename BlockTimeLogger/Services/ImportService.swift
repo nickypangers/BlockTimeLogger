@@ -56,7 +56,8 @@ class ImportService {
             guard dateParts.count == 3,
                   let year = Int(dateParts[0]),
                   let month = Int(dateParts[1]),
-                  let day = Int(dateParts[2]) else {
+                  let day = Int(dateParts[2])
+            else {
                 continue
             }
             
@@ -81,8 +82,11 @@ class ImportService {
             flight.flightNumber = components[1]
             
             // Get airport IDs from ICAO codes
-            let departureAirport = LocalDatabase.shared.getAirportByICAO(components[2])
-            let arrivalAirport = LocalDatabase.shared.getAirportByICAO(components[3])
+            let depCode = components[2]
+            let arrCode = components[3]
+            
+            let departureAirport = depCode.count == 3 ? LocalDatabase.shared.getAirportByIATA(depCode) : LocalDatabase.shared.getAirportByICAO(depCode)
+            let arrivalAirport = depCode.count == 3 ? LocalDatabase.shared.getAirportByIATA(arrCode) : LocalDatabase.shared.getAirportByICAO(arrCode)
             
             flight.departureAirportId = departureAirport?.id ?? 0
             flight.arrivalAirportId = arrivalAirport?.id ?? 0
@@ -107,7 +111,8 @@ class ImportService {
                 let timeParts = cleanTime.split(separator: ":")
                 guard timeParts.count == 2,
                       let hours = Int(timeParts[0]),
-                      let minutes = Int(timeParts[1]) else {
+                      let minutes = Int(timeParts[1])
+                else {
                     return nil
                 }
                 

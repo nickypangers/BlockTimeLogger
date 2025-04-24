@@ -219,6 +219,17 @@ extension LocalDatabase {
         }
     }
     
+    func getAirportByIATA(_ iata: String) -> Airport? {
+        do {
+            return try reader.read { db in
+                try Airport.filter(Airport.Columns.iata == iata).fetchOne(db)
+            }
+        } catch {
+            print("LocalDatabase: Error fetching airport by IATA \(iata): \(error)")
+            return nil
+        }
+    }
+    
     func getAirportByICAO(_ icao: String) -> Airport? {
         do {
             return try reader.read { db in
