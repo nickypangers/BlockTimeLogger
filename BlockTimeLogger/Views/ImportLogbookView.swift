@@ -9,16 +9,9 @@ import SwiftUI
 
 struct ImportLogbookView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var logText: String = ""
-    @State private var isImporting = false
-    @State private var showError = false
-    @State private var errorMessage = ""
-    @State private var importedCount = 0
     @FocusState private var isTextEditorFocused: Bool
-
     @StateObject var homeViewModel: HomeViewModel
-    
-    private let importService = ImportService.shared
+    @StateObject private var importViewModel = ImportViewModel()
     
     var body: some View {
         NavigationStack {
@@ -57,7 +50,7 @@ struct ImportLogbookView: View {
                 .padding(.horizontal)
                 
                 // Text editor
-                TextEditor(text: $logText)
+                TextEditor(text: $importViewModel.logText)
                     .font(.system(.body, design: .monospaced))
                     .frame(maxWidth: .infinity)
                     .frame(height: 300)
@@ -71,7 +64,7 @@ struct ImportLogbookView: View {
                 Button {
                     importFlights()
                 } label: {
-                    if isImporting {
+                    if importViewModel.isImporting {
                         HStack {
                             ProgressView()
                                 .progressViewStyle(.circular)
@@ -84,11 +77,11 @@ struct ImportLogbookView: View {
                     }
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(logText.isEmpty || isImporting)
+                .disabled(importViewModel.logText.isEmpty || importViewModel.isImporting)
                 .padding(.horizontal)
                 
-                if importedCount > 0 {
-                    Text("Successfully imported \(importedCount) flights")
+                if importViewModel.importedCount > 0 {
+                    Text("Successfully imported \(importViewModel.importedCount) flights")
                         .foregroundColor(.green)
                         .padding(.top)
                 }
@@ -97,10 +90,10 @@ struct ImportLogbookView: View {
             }
             .padding(.vertical)
             .navigationBarTitleDisplayMode(.inline)
-            .alert("Import Error", isPresented: $showError) {
+            .alert("Import Error", isPresented: $importViewModel.showError) {
                 Button("OK", role: .cancel) {}
             } message: {
-                Text(errorMessage)
+                Text(importViewModel.errorMessage)
             }
         }
         .onTapGesture {
@@ -109,31 +102,19 @@ struct ImportLogbookView: View {
     }
     
     private func importFlights() {
-        isImporting = true
-        importedCount = 0
-        
-        // Parse flights using ImportService
-        let flights = importService.importFlights(from: logText)
-        
-        do {
-//            try LocalDatabase.shared.createMultipleFlights(flights)
-            for flight in flights {
-                try LocalDatabase.shared.createFlight(flight)
-                importedCount += 1
+        if importViewModel.parseAndMatchFlights() {
+            dismiss()
+            
+            // Present confirmation view with the mapped flights from the ViewModel
+            let confirmationView = ImportLogbookConfirmView(
+                flights: importViewModel.flights,
+                homeViewModel: homeViewModel,
+                importViewModel: importViewModel
+            )
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.rootViewController?.present(UIHostingController(rootView: confirmationView), animated: true)
             }
-            homeViewModel.loadFlights()
-        } catch {
-            errorMessage = "Error importing flights: \(error.localizedDescription)"
-            showError = true
-            return
-        }
-
-        isImporting = false
-        
-        // Show success message or error
-        if importedCount == 0 {
-            errorMessage = "No valid flights found in the provided data"
-            showError = true
         }
     }
 }

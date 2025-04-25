@@ -33,8 +33,6 @@ class ImportService {
             
             guard components.count >= 12 else { continue }
 
-            print(components)
-
             // 0: Date
             // 1: Flight Number
             // 2: Departure Airport
@@ -85,11 +83,16 @@ class ImportService {
             let depCode = components[2]
             let arrCode = components[3]
             
+            // Get airports from database
             let departureAirport = depCode.count == 3 ? LocalDatabase.shared.getAirportByIATA(depCode) : LocalDatabase.shared.getAirportByICAO(depCode)
-            let arrivalAirport = depCode.count == 3 ? LocalDatabase.shared.getAirportByIATA(arrCode) : LocalDatabase.shared.getAirportByICAO(arrCode)
+            let arrivalAirport = arrCode.count == 3 ? LocalDatabase.shared.getAirportByIATA(arrCode) : LocalDatabase.shared.getAirportByICAO(arrCode)
             
+            // Set airport relationships
+            flight.departureAirport = departureAirport
             flight.departureAirportId = departureAirport?.id ?? 0
+            flight.arrivalAirport = arrivalAirport
             flight.arrivalAirportId = arrivalAirport?.id ?? 0
+            
             flight.aircraftRegistration = components[4]
             flight.aircraftType = "B77W" // Default aircraft type
             
@@ -167,8 +170,6 @@ class ImportService {
             
             flights.append(flight)
         }
-        
-        print(flights)
         
         return flights
     }

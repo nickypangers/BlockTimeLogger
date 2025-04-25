@@ -219,6 +219,10 @@ extension LocalDatabase {
         }
     }
     
+    func getAirportByCode(_ code: String) -> Airport? {
+        return code.count == 3 ? getAirportByIATA(code) : getAirportByICAO(code)
+    }
+    
     func getAirportByIATA(_ iata: String) -> Airport? {
         do {
             return try reader.read { db in
