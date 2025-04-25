@@ -16,25 +16,14 @@ struct NewFlightView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-//                    headerSection()
                     FlightHeaderSection(flight: $viewModel.flight, isEditing: true)
-//                    aircraftSection()
                     FlightAircraftSection(flight: $viewModel.flight, isEditing: true)
                     FlightAirportSection(flight: $viewModel.flight, isEditing: true, database: LocalDatabase.shared)
-//                    timelineSection()
-                    FlightTimelineSection(flight: $viewModel.flight, isEditing: true) {
-                        event in
-                        switch event {
-                        case .out: viewModel.activePicker = .out
-                        case .off: viewModel.activePicker = .off
-                        case .on: viewModel.activePicker = .on
-                        case .in: viewModel.activePicker = .in
-                        }
+                    FlightTimelineSection(flight: $viewModel.flight, isEditing: true) { event in
+                        handleTimelineEvent(event)
                     }
                     FlightTimeSummarySection(flight: viewModel.flight)
-//                    timeSummarySection()
                     FlightNotesSection(flight: $viewModel.flight)
-//                    notesSection()
                 }
                 .padding(.vertical)
                 .padding(.bottom, 50)
@@ -62,7 +51,14 @@ struct NewFlightView: View {
         }
     }
 
-    // MARK: - View Components
+    private func handleTimelineEvent(_ event: FlightTimelineSection.FlightEventType) {
+        switch event {
+        case .out: viewModel.activePicker = .out
+        case .off: viewModel.activePicker = .off
+        case .on: viewModel.activePicker = .on
+        case .in: viewModel.activePicker = .in
+        }
+    }
 
     private func toolbarItems() -> some ToolbarContent {
         Group {

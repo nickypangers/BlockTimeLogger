@@ -76,12 +76,16 @@ struct FlightDetailView: View {
         .sheet(item: $viewModel.activePicker) { picker in
             DateTimePicker(selection: viewModel.bindingForPicker(picker))
         }
-        .alert("Invalid Time Sequence",
+        .alert("Validation Error",
                isPresented: $viewModel.showValidationAlert)
         {
             Button("OK", role: .cancel) {}
         } message: {
-            Text("Times must follow: OUT → OFF → ON → IN with positive durations")
+            if let error = viewModel.validationError {
+                Text(error.localizedDescription)
+            } else {
+                Text("Please check all required fields are completed and times are in the correct sequence (OUT → OFF → ON → IN).")
+            }
         }
         .confirmationDialog(
             "Delete Flight",

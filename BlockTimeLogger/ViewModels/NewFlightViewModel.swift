@@ -196,11 +196,6 @@ final class NewFlightViewModel: ObservableObject {
         if !flight.isSelf && flight.pilotInCommand.isEmpty {
             return .missingPilotInCommand
         }
-
-        print("enteredOutTime: \(enteredOutTime)")
-        print("enteredOffTime: \(enteredOffTime)")
-        print("enteredOnTime: \(enteredOnTime)")
-        print("enteredInTime: \(enteredInTime)")
         
         // Time format validation
         if !isValidTimeFormat(enteredOutTime) ||
@@ -248,14 +243,20 @@ final class NewFlightViewModel: ObservableObject {
             return false
         }
         
-        // Try to parse hours and minutes
-        guard let hour = Int(cleaned.prefix(2)),
-              let minute = Int(cleaned.suffix(2)) else {
+        // Check if all characters are digits
+        guard cleaned.allSatisfy({ $0.isNumber }) else {
             return false
         }
         
-        // Validate hours (0-23) and minutes (0-59)
-        return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59
+        // Parse hours and minutes
+        guard let hour = Int(cleaned.prefix(2)),
+              let minute = Int(cleaned.suffix(2)),
+              hour >= 0 && hour <= 23,
+              minute >= 0 && minute <= 59 else {
+            return false
+        }
+        
+        return true
     }
     
     var activePickerBinding: Binding<Date>? {
