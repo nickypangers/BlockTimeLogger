@@ -10,6 +10,14 @@ final class ImportViewModel: ObservableObject {
     @Published var flights: [Flight] = []
     @Published var selectedFlight: Flight?
     @Published var showImportConfirmation = false
+    @Published var columnMapping = ImportColumnMapping()
+    @Published var sampleRow: [String] = []
+    @Published var showColumnMapping = false
+    @Published var importError: String?
+    
+    var isMappingValid: Bool {
+        columnMapping.isValid()
+    }
     
     private let importService = ImportService.shared
     private let db = LocalDatabase.shared
@@ -18,7 +26,7 @@ final class ImportViewModel: ObservableObject {
         isImporting = true
         
         // Parse flights using ImportService
-        flights = importService.importFlights(from: logText)
+        flights = importService.importFlights(from: logText, columnMapping: columnMapping)
         
         if flights.isEmpty {
             errorMessage = "No valid flights found in the provided data"
@@ -86,5 +94,77 @@ final class ImportViewModel: ObservableObject {
         showError = false
         errorMessage = ""
         showImportConfirmation = false
+        columnMapping = ImportColumnMapping()
+        sampleRow = []
+        showColumnMapping = false
+    }
+    
+    func extractSampleRow() {
+        let lines = logText.components(separatedBy: .newlines)
+            .filter { !$0.isEmpty }
+            .filter { !$0.contains("Sector") }
+            .filter { !$0.contains("----") }
+            .filter { !$0.contains("Report Date") }
+            .filter { !$0.contains("Log Book record") }
+        
+        guard let firstLine = lines.first else { return }
+        
+        sampleRow = firstLine.components(separatedBy: .whitespaces)
+            .filter { !$0.isEmpty }
+    }
+    
+    func parseSampleRow(_ text: String) {
+        let lines = text.components(separatedBy: .newlines)
+        guard let firstLine = lines.first else { return }
+        
+        // Split the line by tabs or commas
+        let components = firstLine.components(separatedBy: CharacterSet(charactersIn: "\t,"))
+        sampleRow = components.map { $0.trimmingCharacters(in: .whitespaces) }
+        
+        // Try to auto-detect column mapping
+        autoDetectColumnMapping()
+    }
+    
+    func autoDetectColumnMapping() {
+        for (index, value) in sampleRow.enumerated() {
+            let lowercasedValue = value.lowercased()
+            
+            // Try to match column names
+            if lowercasedValue.contains("date") {
+                columnMapping.setColumnIndex(for: .date, index: index)
+            } else if lowercasedValue.contains("flight") {
+                columnMapping.setColumnIndex(for: .flightNumber, index: index)
+            } else if lowercasedValue.contains("dep") || lowercasedValue.contains("from") {
+                columnMapping.setColumnIndex(for: .departureAirport, index: index)
+            } else if lowercasedValue.contains("arr") || lowercasedValue.contains("to") {
+                columnMapping.setColumnIndex(for: .arrivalAirport, index: index)
+            } else if lowercasedValue.contains("reg") || lowercasedValue.contains("tail") {
+                columnMapping.setColumnIndex(for: .aircraftRegistration, index: index)
+            } else if lowercasedValue.contains("out") {
+                columnMapping.setColumnIndex(for: .outTime, index: index)
+            } else if lowercasedValue.contains("off") {
+                columnMapping.setColumnIndex(for: .offTime, index: index)
+            } else if lowercasedValue.contains("on") {
+                columnMapping.setColumnIndex(for: .onTime, index: index)
+            } else if lowercasedValue.contains("in") {
+                columnMapping.setColumnIndex(for: .inTime, index: index)
+            } else if lowercasedValue.contains("pic") || lowercasedValue.contains("captain") {
+                columnMapping.setColumnIndex(for: .pic, index: index)
+            }
+        }
+    }
+    
+    func importFlights(_ text: String) async {
+        isImporting = true
+        importError = nil
+        
+        do {
+            let flights = importService.importFlights(from: text, columnMapping: columnMapping)
+            try LocalDatabase.shared.createMultipleFlights(flights)
+        } catch {
+            importError = error.localizedDescription
+        }
+        
+        isImporting = false
     }
 }

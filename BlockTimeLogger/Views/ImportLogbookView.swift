@@ -12,6 +12,7 @@ struct ImportLogbookView: View {
     @FocusState private var isTextEditorFocused: Bool
     @StateObject var homeViewModel: HomeViewModel
     @StateObject private var importViewModel = ImportViewModel()
+    @State private var showColumnMapping = false
     
     var body: some View {
         NavigationStack {
@@ -30,24 +31,24 @@ struct ImportLogbookView: View {
                 .padding(.horizontal)
                 
                 // Example format
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Example Format:")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                // VStack(alignment: .leading, spacing: 4) {
+                //     Text("Example Format:")
+                //         .font(.caption)
+                //         .foregroundColor(.secondary)
                     
-                    Text("""
-                    Sector    Flt                    Block    UTC      UTC       UTC      UTC     Take       Auto
-                    Date(UTC)   No.    Sector    Reg   Time   Off-Blk  Airborne  Landing   On-Blk Off  Land  Land     Commander
-                    ----------  ----  --------  -----  -----  -------  --------  --------  -------  ---  ----  ----  -------------------
-                    2024/10/01  ABC810   VHHH CYVR   B-AAA  11:33  08:09    08:24     19:36     19:42     0     0    N     APPLESEED J
-                    """)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .padding(8)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
-                }
-                .padding(.horizontal)
+                //     Text("""
+                //     Sector    Flt                    Block    UTC      UTC       UTC      UTC     Take       Auto
+                //     Date(UTC)   No.    Sector    Reg   Time   Off-Blk  Airborne  Landing   On-Blk Off  Land  Land     Commander
+                //     ----------  ----  --------  -----  -----  -------  --------  --------  -------  ---  ----  ----  -------------------
+                //     2024/10/01  ABC810   VHHH CYVR   B-AAA  11:33  08:09    08:24     19:36     19:42     0     0    N     APPLESEED J
+                //     """)
+                //     .font(.caption)
+                //     .foregroundColor(.secondary)
+                //     .padding(8)
+                //     .background(Color(.systemGray6))
+                //     .cornerRadius(8)
+                // }
+                // .padding(.horizontal)
                 
                 // Text editor
                 TextEditor(text: $importViewModel.logText)
@@ -59,6 +60,24 @@ struct ImportLogbookView: View {
                     .cornerRadius(8)
                     .padding(.horizontal)
                     .focused($isTextEditorFocused)
+                
+                // Column mapping button
+                Button {
+                    importViewModel.extractSampleRow()
+                    showColumnMapping = true
+                } label: {
+                    HStack {
+                        Image(systemName: "tablecells")
+                        Text("Map Columns")
+                        if !importViewModel.isMappingValid {
+                            Image(systemName: "exclamationmark.circle.fill")
+                                .foregroundColor(.red)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .padding(.horizontal)
                 
                 // Import button
                 Button {
@@ -77,7 +96,7 @@ struct ImportLogbookView: View {
                     }
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(importViewModel.logText.isEmpty || importViewModel.isImporting)
+                .disabled(importViewModel.logText.isEmpty || importViewModel.isImporting || !importViewModel.isMappingValid)
                 .padding(.horizontal)
                 
                 if importViewModel.importedCount > 0 {
@@ -94,6 +113,9 @@ struct ImportLogbookView: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(importViewModel.errorMessage)
+            }
+            .sheet(isPresented: $showColumnMapping) {
+                ColumnMapper(viewModel: importViewModel)
             }
         }
         .onTapGesture {
