@@ -66,3 +66,29 @@ struct ImportColumnMapping: Codable {
         return requiredColumns.allSatisfy { mappings[$0]?.isEmpty == false }
     }
 }
+
+class ImportColumnMappingManager {
+    static let shared = ImportColumnMappingManager()
+    private let userDefaults = UserDefaults.standard
+    private let mappingKey = "importColumnMapping"
+    
+    private init() {}
+    
+    func saveMapping(_ mapping: ImportColumnMapping) {
+        if let encoded = try? JSONEncoder().encode(mapping) {
+            userDefaults.set(encoded, forKey: mappingKey)
+        }
+    }
+    
+    func loadMapping() -> ImportColumnMapping {
+        if let data = userDefaults.data(forKey: mappingKey),
+           let mapping = try? JSONDecoder().decode(ImportColumnMapping.self, from: data) {
+            return mapping
+        }
+        return ImportColumnMapping()
+    }
+    
+    func resetToDefault() {
+        saveMapping(ImportColumnMapping())
+    }
+}

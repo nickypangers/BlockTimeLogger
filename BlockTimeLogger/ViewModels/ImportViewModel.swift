@@ -10,10 +10,14 @@ final class ImportViewModel: ObservableObject {
     @Published var flights: [Flight] = []
     @Published var selectedFlight: Flight?
     @Published var showImportConfirmation = false
-    @Published var columnMapping = ImportColumnMapping()
+    @Published var columnMapping: ImportColumnMapping
     @Published var sampleRow: [String] = []
     @Published var showColumnMapping = false
     @Published var importError: String?
+    
+    init() {
+        self.columnMapping = ImportColumnMappingManager.shared.loadMapping()
+    }
     
     var isMappingValid: Bool {
         columnMapping.isValid()
@@ -94,7 +98,7 @@ final class ImportViewModel: ObservableObject {
         showError = false
         errorMessage = ""
         showImportConfirmation = false
-        columnMapping = ImportColumnMapping()
+        columnMapping = ImportColumnMappingManager.shared.loadMapping()
         sampleRow = []
         showColumnMapping = false
     }
@@ -166,5 +170,15 @@ final class ImportViewModel: ObservableObject {
         }
         
         isImporting = false
+    }
+    
+    func updateColumnMapping(_ newMapping: ImportColumnMapping) {
+        columnMapping = newMapping
+        ImportColumnMappingManager.shared.saveMapping(newMapping)
+    }
+    
+    func resetColumnMapping() {
+        columnMapping = ImportColumnMapping()
+        ImportColumnMappingManager.shared.resetToDefault()
     }
 }

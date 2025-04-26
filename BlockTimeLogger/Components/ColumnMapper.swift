@@ -3,6 +3,7 @@ import SwiftUI
 struct ColumnMapper: View {
     @ObservedObject var viewModel: ImportViewModel
     @Environment(\.dismiss) private var dismiss
+    @State private var showSaveAlert = false
     
     private var requiredColumns: [ImportColumnMapping.ColumnType] {
         ImportColumnMapping.ColumnType.allCases.filter { $0.isRequired }
@@ -24,7 +25,7 @@ struct ColumnMapper: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 if viewModel.sampleRow.isEmpty {
                     Section {
@@ -35,7 +36,14 @@ struct ColumnMapper: View {
                     sampleRowSection
                     requiredColumnsSection
                     optionalColumnsSection
-                    // autoDetectSection
+                    
+                    Section {
+                        Button("Save as Default") {
+                            showSaveAlert = true
+                        }
+                    } footer: {
+                        Text("Save this column mapping as the default for future imports.")
+                    }
                 }
             }
             .navigationTitle("Column Mapping")
@@ -51,6 +59,14 @@ struct ColumnMapper: View {
                         dismiss()
                     }
                 }
+            }
+            .alert("Save Column Mapping", isPresented: $showSaveAlert) {
+                Button("Save", role: .none) {
+                    ImportColumnMappingManager.shared.saveMapping(viewModel.columnMapping)
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This will save the current column mapping as the default for all future imports.")
             }
         }
     }
@@ -115,14 +131,6 @@ struct ColumnMapper: View {
                         Text("Column \(index + 1)").tag(index)
                     }
                 }
-            }
-        }
-    }
-    
-    private var autoDetectSection: some View {
-        Section {
-            Button("Auto-Detect") {
-                viewModel.autoDetectColumnMapping()
             }
         }
     }
