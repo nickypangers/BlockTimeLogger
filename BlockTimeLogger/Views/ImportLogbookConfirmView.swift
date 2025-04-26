@@ -20,7 +20,7 @@ struct ImportLogbookConfirmView: View {
     var body: some View {
         NavigationStack {
             List {
-                ForEach(importViewModel.flights) { flight in
+                ForEach(importViewModel.flights.sorted { $0.date > $1.date }) { flight in
                     FlightLogOverview(flight: flight)
                         .contentShape(Rectangle())
                         .onTapGesture {
