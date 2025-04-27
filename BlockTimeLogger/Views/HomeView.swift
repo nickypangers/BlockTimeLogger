@@ -104,7 +104,7 @@ struct HomeView: View {
     
     private func addFlightButton() -> some View {
         NavigationLink {
-            NewFlightView(homeViewModel: viewModel)
+            AddEntryView(homeViewModel: viewModel)
         } label: {
             Image(systemName: "plus")
                 .font(.title2.bold())

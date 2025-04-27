@@ -80,21 +80,20 @@ struct FlightLogOverview: View {
                     switch flight.operatingCapacity {
                     case .p1:
                         Text("P1")
-                            .tagStyle(color: Flight.OperatingCapacity.p1.color)
+                            .tagStyle(color: OperatingCapacity.p1.color)
                     case .p1us:
                         Text("P1 U/S")
-                            .tagStyle(color: Flight.OperatingCapacity.p1us.color)
+                            .tagStyle(color: OperatingCapacity.p1us.color)
                     case .p2:
                         Text("P2")
-                            .tagStyle(color: Flight.OperatingCapacity.p2.color)
+                            .tagStyle(color: OperatingCapacity.p2.color)
                     case .p2x:
                         Text("P2X")
-                            .tagStyle(color: Flight.OperatingCapacity.p2x.color)
+                            .tagStyle(color: OperatingCapacity.p2x.color)
                     case .put:
                         Text("P U/T")
-                            .tagStyle(color: Flight.OperatingCapacity.put.color)
+                            .tagStyle(color: OperatingCapacity.put.color)
                     }
-                    
                 }
                 .background(
                     GeometryReader { geometry in

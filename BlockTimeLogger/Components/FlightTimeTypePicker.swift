@@ -1,18 +1,18 @@
 import SwiftUI
 
 struct OperatingCapacityPicker: View {
-    @Binding var selectedType: Flight.OperatingCapacity
+    @Binding var selectedType: OperatingCapacity
     let isEditing: Bool
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Position")
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.secondary)
-            
+
             if isEditing {
                 Picker("Position", selection: $selectedType) {
-                    ForEach(Flight.OperatingCapacity.allCases, id: \.self) { type in
+                    ForEach(OperatingCapacity.allCases, id: \.self) { type in
                         Text(type.rawValue)
                             .tag(type)
                     }
@@ -41,7 +41,7 @@ struct OperatingCapacityPicker: View {
             selectedType: .constant(.p2),
             isEditing: true
         )
-        
+
         OperatingCapacityPicker(
             selectedType: .constant(.p1),
             isEditing: false
@@ -49,4 +49,4 @@ struct OperatingCapacityPicker: View {
     }
     .padding()
     .background(Color(.systemGroupedBackground))
-} 
+}

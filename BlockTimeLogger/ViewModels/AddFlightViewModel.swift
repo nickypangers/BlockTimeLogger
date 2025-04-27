@@ -7,7 +7,7 @@
 import Foundation
 import SwiftUI
 
-final class NewFlightViewModel: ObservableObject {
+final class AddFlightViewModel: ObservableObject {
     @Published var flight: Flight
     @Published var showValidationAlert = false
     @Published var validationError: ValidationError?

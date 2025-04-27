@@ -7,9 +7,9 @@
 
 import SwiftUI
 
-struct NewFlightView: View {
+struct AddFlightView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel = NewFlightViewModel()
+    @StateObject private var viewModel = AddFlightViewModel()
     @StateObject var homeViewModel: HomeViewModel
 
     var body: some View {
@@ -29,7 +29,7 @@ struct NewFlightView: View {
                 .padding(.bottom, 50)
             }
             .ignoresSafeArea(.keyboard)
-            .navigationTitle("New Flight")
+            .navigationTitle("Add Flight")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbarItems() }
             .sheet(item: $viewModel.activePicker) { _ in
@@ -76,5 +76,5 @@ struct NewFlightView: View {
 }
 
 #Preview {
-    NewFlightView(homeViewModel: HomeViewModel())
+    AddFlightView(homeViewModel: HomeViewModel())
 }
