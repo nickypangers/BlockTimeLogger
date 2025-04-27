@@ -40,28 +40,21 @@ final class ImportViewModel: ObservableObject {
         }
         
         // Match airport IDs for each flight
-        do {
-            for i in 0 ..< flights.count {
-                // Get departure airport
-                if let departureAirport = try LocalDatabase.shared.getAirportByCode(flights[i].departureAirportICAO) {
-                    flights[i].departureAirport = departureAirport
-                    flights[i].departureAirportId = departureAirport.id
-                }
-                
-                // Get arrival airport
-                if let arrivalAirport = try LocalDatabase.shared.getAirportByCode(flights[i].arrivalAirportICAO) {
-                    flights[i].arrivalAirport = arrivalAirport
-                    flights[i].arrivalAirportId = arrivalAirport.id
-                }
+        for i in 0 ..< flights.count {
+            // Get departure airport
+            if let departureAirport = LocalDatabase.shared.getAirportByCode(flights[i].departureAirportICAO) {
+                flights[i].departureAirport = departureAirport
+                flights[i].departureAirportId = departureAirport.id
             }
-            isImporting = false
-            return true
-        } catch {
-            errorMessage = "Error matching airports: \(error.localizedDescription)"
-            showError = true
-            isImporting = false
-            return false
+            
+            // Get arrival airport
+            if let arrivalAirport = LocalDatabase.shared.getAirportByCode(flights[i].arrivalAirportICAO) {
+                flights[i].arrivalAirport = arrivalAirport
+                flights[i].arrivalAirportId = arrivalAirport.id
+            }
         }
+        isImporting = false
+        return true
     }
     
     func importFlights(homeViewModel: HomeViewModel) -> Bool {

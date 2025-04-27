@@ -62,14 +62,14 @@ struct FlightAirportSection: View {
                 arrivalAirport = database.getAirportByICAO(flight.arrivalAirportICAO)
             }
         }
-        .onChange(of: flight.departureAirportId) { newId in
+        .onChange(of: flight.departureAirportId) {
             Task {
                 if let airport = database.getAirportByICAO(flight.departureAirportICAO) {
                     flight.departureAirport = airport
                 }
             }
         }
-        .onChange(of: flight.arrivalAirportId) { newId in
+        .onChange(of: flight.arrivalAirportId) {
             Task {
                 if let airport = database.getAirportByICAO(flight.arrivalAirportICAO) {
                     flight.arrivalAirport = airport

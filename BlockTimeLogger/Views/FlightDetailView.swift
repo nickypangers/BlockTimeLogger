@@ -34,7 +34,7 @@ struct FlightDetailView: View {
                     case .in: viewModel.activePicker = .in
                     }
                 }
-                .padding(.horizontal)
+                
                 FlightTimeSummarySection(flight: viewModel.draftFlight)
 
                 if viewModel.isEditing {

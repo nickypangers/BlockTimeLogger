@@ -30,12 +30,18 @@ struct ImportColumnMapping: Codable {
         var allowsMultipleMappings: Bool {
             self == .pic
         }
+        
+        var allowsPrefix: Bool {
+            self == .flightNumber
+        }
     }
     
     var mappings: [ColumnType: [Int]]
+    var flightNumberPrefix: String
     
     init() {
         mappings = [:]
+        flightNumberPrefix = ""
     }
     
     func getColumnIndex(for type: ColumnType) -> Int? {
@@ -82,7 +88,8 @@ class ImportColumnMappingManager {
     
     func loadMapping() -> ImportColumnMapping {
         if let data = userDefaults.data(forKey: mappingKey),
-           let mapping = try? JSONDecoder().decode(ImportColumnMapping.self, from: data) {
+           let mapping = try? JSONDecoder().decode(ImportColumnMapping.self, from: data)
+        {
             return mapping
         }
         return ImportColumnMapping()

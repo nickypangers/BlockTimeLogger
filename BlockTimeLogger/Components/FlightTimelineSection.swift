@@ -50,6 +50,7 @@ struct FlightTimelineSection: View {
                     .foregroundColor(.secondary)
                 Spacer()
             }
+            .padding(.bottom, 8)
 
             VStack(spacing: 0) {
                 TimelineEventView(eventType: .out, time: $flight.outTime, isEditing: isEditing) {
@@ -80,6 +81,7 @@ struct FlightTimelineSection: View {
                     .fill(Color(.secondarySystemBackground))
             )
         }
+        .padding(.horizontal)
     }
     
     struct TimelineEventView: View {

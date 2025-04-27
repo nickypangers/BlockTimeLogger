@@ -68,7 +68,8 @@ class ImportService {
             if let flightNumberIndex = columnMapping.getColumnIndex(for: .flightNumber),
                flightNumberIndex < components.count
             {
-                flight.flightNumber = components[flightNumberIndex]
+                let flightNumber = components[flightNumberIndex]
+                flight.flightNumber = columnMapping.flightNumberPrefix + flightNumber
             }
             
             // Parse departure and arrival airports

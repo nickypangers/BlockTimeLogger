@@ -269,13 +269,9 @@
 				DEVELOPMENT_TEAM = V4NZK4R79F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-<<<<<<< Updated upstream
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
-=======
 				INFOPLIST_KEY_CFBundleDisplayName = "Block Time Logger";
 				"INFOPLIST_KEY_CFBundleDisplayName[sdk=iphoneos*]" = "Block Time Logger";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
->>>>>>> Stashed changes
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -305,13 +301,9 @@
 				DEVELOPMENT_TEAM = V4NZK4R79F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-<<<<<<< Updated upstream
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
-=======
 				INFOPLIST_KEY_CFBundleDisplayName = "Block Time Logger";
 				"INFOPLIST_KEY_CFBundleDisplayName[sdk=iphoneos*]" = "Block Time Logger";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
->>>>>>> Stashed changes
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

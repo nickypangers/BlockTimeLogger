@@ -220,7 +220,12 @@ extension LocalDatabase {
     }
     
     func getAirportByCode(_ code: String) -> Airport? {
-        return code.count == 3 ? getAirportByIATA(code) : getAirportByICAO(code)
+        do {
+            return code.count == 3 ? getAirportByIATA(code) : getAirportByICAO(code)
+        } catch {
+            print("LocalDatabase: Error fetching airport \(code): \(error)")
+            return nil
+        }
     }
     
     func getAirportByIATA(_ iata: String) -> Airport? {

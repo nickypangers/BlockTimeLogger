@@ -111,10 +111,24 @@ struct ColumnMapper: View {
                         }
                     }
                 } else {
-                    Picker(column.rawValue, selection: columnBinding(for: column)) {
-                        Text("Not Mapped").tag(-1)
-                        ForEach(0..<viewModel.sampleRow.count, id: \.self) { index in
-                            Text("Column \(index + 1)").tag(index)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Picker(column.rawValue, selection: columnBinding(for: column)) {
+                            Text("Not Mapped").tag(-1)
+                            ForEach(0..<viewModel.sampleRow.count, id: \.self) { index in
+                                Text("Column \(index + 1)").tag(index)
+                            }
+                        }
+                        
+                        if column == .flightNumber && viewModel.columnMapping.getColumnIndex(for: .flightNumber) != nil {
+                            TextField("Flight Number Prefix (optional)", text: Binding(
+                                get: { viewModel.columnMapping.flightNumberPrefix },
+                                set: { newValue in
+                                    var mapping = viewModel.columnMapping
+                                    mapping.flightNumberPrefix = newValue
+                                    viewModel.columnMapping = mapping
+                                }
+                            ))
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
                         }
                     }
                 }
