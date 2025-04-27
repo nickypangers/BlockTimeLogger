@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3D6071AA2DA3C30500A186F0 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 3D6071A92DA3C30500A186F0 /* FirebaseAnalytics */; };
 		3D6071AD2DA3C56200A186F0 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 3D6071AC2DA3C56200A186F0 /* GRDB */; };
 		3D6071BD2DA983EF00A186F0 /* Inject in Frameworks */ = {isa = PBXBuildFile; productRef = 3D6071BC2DA983EF00A186F0 /* Inject */; };
 /* End PBXBuildFile section */
@@ -29,7 +28,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D6071AA2DA3C30500A186F0 /* FirebaseAnalytics in Frameworks */,
 				3D6071AD2DA3C56200A186F0 /* GRDB in Frameworks */,
 				3D6071BD2DA983EF00A186F0 /* Inject in Frameworks */,
 			);
@@ -74,7 +72,6 @@
 			);
 			name = BlockTimeLogger;
 			packageProductDependencies = (
-				3D6071A92DA3C30500A186F0 /* FirebaseAnalytics */,
 				3D6071AC2DA3C56200A186F0 /* GRDB */,
 				3D6071BC2DA983EF00A186F0 /* Inject */,
 			);
@@ -272,7 +269,13 @@
 				DEVELOPMENT_TEAM = V4NZK4R79F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+<<<<<<< Updated upstream
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
+=======
+				INFOPLIST_KEY_CFBundleDisplayName = "Block Time Logger";
+				"INFOPLIST_KEY_CFBundleDisplayName[sdk=iphoneos*]" = "Block Time Logger";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+>>>>>>> Stashed changes
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -302,7 +305,13 @@
 				DEVELOPMENT_TEAM = V4NZK4R79F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+<<<<<<< Updated upstream
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
+=======
+				INFOPLIST_KEY_CFBundleDisplayName = "Block Time Logger";
+				"INFOPLIST_KEY_CFBundleDisplayName[sdk=iphoneos*]" = "Block Time Logger";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+>>>>>>> Stashed changes
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -372,11 +381,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		3D6071A92DA3C30500A186F0 /* FirebaseAnalytics */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3D6071A82DA3C30500A186F0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAnalytics;
-		};
 		3D6071AC2DA3C56200A186F0 /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 3D6071AB2DA3C56200A186F0 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
