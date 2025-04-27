@@ -52,16 +52,16 @@ struct HomeView: View {
                         } label: {
                             Label("Import", systemImage: "square.and.arrow.down")
                         }
-                        NavigationLink {
-                            ExportLogbookView()
-                        } label: {
-                            Label("Export", systemImage: "square.and.arrow.up")
-                        }
-                        NavigationLink {
-//                            SeeAllFlightsView(flights: viewModel.flights)
-                        } label: {
-                            Label("Settings", systemImage: "gear")
-                        }
+                        // NavigationLink {
+                        //     ExportLogbookView()
+                        // } label: {
+                        //     Label("Export", systemImage: "square.and.arrow.up")
+                        // }
+                        // NavigationLink {
+                        //    SeeAllFlightsView(flights: viewModel.flights)
+                        // } label: {
+                        //     Label("Settings", systemImage: "gear")
+                        // }
                     } label: {
                         Image(systemName: "ellipsis.circle")
                             .font(.title3)
