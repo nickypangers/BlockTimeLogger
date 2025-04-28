@@ -11,6 +11,12 @@ import SwiftUI
 struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     
+    private var versionString: String {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "Unknown"
+        return "Version: \(version) (\(build))"
+    }
+    
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
@@ -52,6 +58,11 @@ struct HomeView: View {
                         } label: {
                             Label("Import", systemImage: "square.and.arrow.down")
                         }
+                        
+                        Text(versionString)
+                            .foregroundColor(.secondary)
+                            .font(.system(size: 8))
+                        
                         // NavigationLink {
                         //     ExportLogbookView()
                         // } label: {

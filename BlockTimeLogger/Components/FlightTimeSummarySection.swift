@@ -11,7 +11,7 @@ struct FlightTimeSummarySection: View {
     var flight: Flight
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(alignment: .leading,spacing: 16) {
             Text("TIME SUMMARY")
                 .font(.caption)
                 .foregroundColor(.secondary)

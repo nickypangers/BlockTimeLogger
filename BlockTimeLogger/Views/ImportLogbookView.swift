@@ -23,32 +23,12 @@ struct ImportLogbookView: View {
                         .font(.title2)
                         .bold()
                     
-                    Text("Paste your flight log data in the format shown below")
+                    Text("Paste your flight log data in the format shown below and then press the 'Map Columns' button to map the columns to the flight log fields.")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal)
-                
-                // Example format
-                // VStack(alignment: .leading, spacing: 4) {
-                //     Text("Example Format:")
-                //         .font(.caption)
-                //         .foregroundColor(.secondary)
-                    
-                //     Text("""
-                //     Sector    Flt                    Block    UTC      UTC       UTC      UTC     Take       Auto
-                //     Date(UTC)   No.    Sector    Reg   Time   Off-Blk  Airborne  Landing   On-Blk Off  Land  Land     Commander
-                //     ----------  ----  --------  -----  -----  -------  --------  --------  -------  ---  ----  ----  -------------------
-                //     2024/10/01  ABC810   VHHH CYVR   B-AAA  11:33  08:09    08:24     19:36     19:42     0     0    N     APPLESEED J
-                //     """)
-                //     .font(.caption)
-                //     .foregroundColor(.secondary)
-                //     .padding(8)
-                //     .background(Color(.systemGray6))
-                //     .cornerRadius(8)
-                // }
-                // .padding(.horizontal)
                 
                 // Text editor
                 TextEditor(text: $importViewModel.logText)

@@ -11,7 +11,7 @@ import SwiftUI
 struct FlightAircraftSection: View {
     @Binding var flight: Flight
     var isEditing: Bool
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("AIRCRAFT")
@@ -126,9 +126,7 @@ struct FlightAircraftSection: View {
     private func typeField() -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("TYPE")
-                .font(.system(size: 11, weight: .bold))
-                .foregroundColor(Color(.systemGray))
-                .kerning(0.5)
+                .sectionHeaderStyle()
             TextField("", text: $flight.aircraftType)
                 .aviationInputStyle()
                 .font(.system(size: 16, weight: .medium))
@@ -168,7 +166,16 @@ struct FlightAircraftSection: View {
     @ViewBuilder
     private func roleConfiguration() -> some View {
         VStack(spacing: 12) {
-            Toggle("Pilot Flying (PF)", isOn: $flight.isPF)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Pilot Role")
+                    .sectionHeaderStyle()
+                
+                Picker("Pilot Role", selection: $flight.isPF) {
+                    Text("PF").tag(true)
+                    Text("PM").tag(false)
+                }
+                .pickerStyle(.segmented)
+            }
             
             ifrVfrToggles()
             
@@ -177,9 +184,7 @@ struct FlightAircraftSection: View {
             // Operating Capacity
             VStack(alignment: .leading, spacing: 4) {
                 Text("Operating Capacity")
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(Color(.systemGray))
-                    .kerning(0.5)
+                    .sectionHeaderStyle()
                 
                 Picker("Operating Capacity", selection: $flight.operatingCapacity) {
                     ForEach(OperatingCapacity.allCases, id: \.self) { type in
@@ -196,27 +201,37 @@ struct FlightAircraftSection: View {
     
     @ViewBuilder
     private func ifrVfrToggles() -> some View {
-        HStack {
-            Toggle("IFR", isOn: $flight.isIFR)
-                .onChange(of: flight.isIFR) {
-                    if flight.isIFR { flight.isVFR = false }
-                }
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Flight Type")
+                .sectionHeaderStyle()
             
-            Toggle("VFR", isOn: $flight.isVFR)
-                .onChange(of: flight.isVFR) {
-                    if flight.isVFR { flight.isIFR = false }
+            Picker("Flight Type", selection: Binding(
+                get: { flight.isIFR ? 0 : 1 },
+                set: { newValue in
+                    flight.isIFR = newValue == 0
+                    flight.isVFR = newValue == 1
                 }
+            )) {
+                Text("IFR").tag(0)
+                Text("VFR").tag(1)
+            }
+            .pickerStyle(.segmented)
         }
     }
     
     @ViewBuilder
     private func positionPicker() -> some View {
-        Picker("Position", selection: $flight.position) {
-            ForEach(Flight.Position.allCases, id: \.self) { position in
-                Text(position.rawValue).tag(position)
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Position")
+                .sectionHeaderStyle()
+            
+            Picker("Position", selection: $flight.position) {
+                ForEach(Flight.Position.allCases, id: \.self) { position in
+                    Text(position.rawValue).tag(position)
+                }
             }
+            .pickerStyle(.segmented)
         }
-        .pickerStyle(.segmented)
     }
 }
 

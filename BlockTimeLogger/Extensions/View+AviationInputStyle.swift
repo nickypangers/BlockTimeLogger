@@ -14,4 +14,11 @@ extension View {
             .textContentType(.none)
             .textInputAutocapitalization(.characters)
     }
+
+    func sectionHeaderStyle() -> some View {
+        self
+            .font(.system(size: 11, weight: .bold))
+            .foregroundStyle(Color(.systemGray))
+            .kerning(0.5)
+    }
 }

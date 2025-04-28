@@ -105,12 +105,12 @@ struct AddSimView: View {
     }
     
     private func saveSim() {
-        do {
+        print(viewModel.sim)
+//        do {
 //            try LocalDatabase.shared.saveSim(viewModel.sim)
-            print(viewModel.sim)
-        } catch {
-            print("Error saving sim: \(error)")
-        }
+//        } catch {
+//            print("Error saving sim: \(error)")
+//        }
     }
 }
 
