@@ -51,6 +51,8 @@ extension LocalDatabase {
     }
 
     func updateFlight(_ flight: Flight) throws {
+        print("update flight \(flight)")
+        
         print("LocalDatabase: Updating flight: \(flight.id)")
         try writer.write { db in
             try flight.update(db)
