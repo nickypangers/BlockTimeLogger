@@ -409,7 +409,7 @@ class ExportService {
         
         // Add flight data
         for flight in flights {
-            content += "\(flight.formattedDate),\(flight.aircraftType),\(flight.departureAirport),\(flight.arrivalAirport),\(String(format: "%.1f", flight.blockTime)),\n"
+            content += "\(flight.formattedDate),\(flight.aircraftType),\(String(describing: flight.departureAirport)),\(String(describing: flight.arrivalAirport)),\(String(format: "%.1f", flight.blockTime)),\n"
         }
         
         do {
@@ -437,7 +437,7 @@ class ExportService {
         
         // Add flight data
         for flight in flights {
-            content += "\(flight.formattedDate),\(flight.aircraftType),\(flight.departureAirport),\(flight.arrivalAirport),\(String(format: "%.1f", flight.blockTime)),\n"
+            content += "\(flight.formattedDate),\(flight.aircraftType),\(String(describing: flight.departureAirport)),\(String(describing: flight.arrivalAirport)),\(String(format: "%.1f", flight.blockTime)),\n"
         }
         
         do {

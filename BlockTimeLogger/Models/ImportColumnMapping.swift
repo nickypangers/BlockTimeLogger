@@ -16,13 +16,14 @@ struct ImportColumnMapping: Codable {
         case landings = "Landings"
         case autoland = "Autoland"
         case blockTime = "Block Time"
+        case operatingCapacity = "Operating Capacity"
         
         var isRequired: Bool {
             switch self {
             case .date, .flightNumber, .departureAirport, .arrivalAirport, .aircraftRegistration,
                  .outTime, .offTime, .onTime, .inTime, .pic:
                 return true
-            case .takeoff, .landings, .autoland, .blockTime:
+            case .takeoff, .landings, .autoland, .blockTime, .operatingCapacity:
                 return false
             }
         }
@@ -38,10 +39,12 @@ struct ImportColumnMapping: Codable {
     
     var mappings: [ColumnType: [Int]]
     var flightNumberPrefix: String
+    var defaultOperatingCapacity: OperatingCapacity
     
     init() {
         mappings = [:]
         flightNumberPrefix = ""
+        defaultOperatingCapacity = .p1
     }
     
     func getColumnIndex(for type: ColumnType) -> Int? {

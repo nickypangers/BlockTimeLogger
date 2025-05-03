@@ -62,8 +62,8 @@ class FlightDataService: FlightDataServiceProtocol {
             let aircraftReg = "\(regPrefix)\(String(format: "%03d", Int.random(in: 100...999)))"
             
             // Airports
-            let departureAirport = ["VHHH", "WSSS", "RJTT", "KLAX", "KJFK"].randomElement()!
-            let arrivalAirport = ["VHHH", "WSSS", "RJTT", "KLAX", "KJFK"].randomElement()!
+//            let departureAirport = ["VHHH", "WSSS", "RJTT", "KLAX", "KJFK"].randomElement()!
+//            let arrivalAirport = ["VHHH", "WSSS", "RJTT", "KLAX", "KJFK"].randomElement()!
             
             // Pilot name
             let firstName = firstNames.randomElement()!

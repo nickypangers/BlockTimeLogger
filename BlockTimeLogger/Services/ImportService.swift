@@ -81,8 +81,8 @@ class ImportService {
                 let depCode = components[depIndex]
                 let arrCode = components[arrIndex]
                 
-                let departureAirport = depCode.count == 3 ? LocalDatabase.shared.getAirportByIATA(depCode) : LocalDatabase.shared.getAirportByICAO(depCode)
-                let arrivalAirport = arrCode.count == 3 ? LocalDatabase.shared.getAirportByIATA(arrCode) : LocalDatabase.shared.getAirportByICAO(arrCode)
+                let departureAirport = LocalDatabase.shared.getAirportByCode(depCode)
+                let arrivalAirport = LocalDatabase.shared.getAirportByCode(arrCode)
                 
                 flight.departureAirport = departureAirport
                 flight.departureAirportId = departureAirport?.id ?? 0
@@ -176,11 +176,19 @@ class ImportService {
                 flight.pilotInCommand = picParts.joined(separator: " ")
             }
             
+            if let opCapIndex = columnMapping.getColumnIndex(for: .operatingCapacity), opCapIndex < components.count {
+                if let operatingCapacity = OperatingCapacity(rawValue: components[opCapIndex]) {
+                    flight.operatingCapacity = operatingCapacity
+                }
+            } else {
+                flight.operatingCapacity = columnMapping.defaultOperatingCapacity
+            }
+            
             // Set default values
             flight.aircraftType = "B77W"
             flight.isSelf = false
             flight.position = .secondOfficer
-            flight.operatingCapacity = .p2x
+//            flight.operatingCapacity = .p2x
             flight.isIFR = true
             flight.isVFR = false
             flight.isPF = false

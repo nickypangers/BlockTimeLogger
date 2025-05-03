@@ -139,10 +139,20 @@ struct ColumnMapper: View {
     private var optionalColumnsSection: some View {
         Section(header: Text("Optional Columns")) {
             ForEach(optionalColumns, id: \.self) { column in
-                Picker(column.rawValue, selection: columnBinding(for: column)) {
-                    Text("Not Mapped").tag(-1)
-                    ForEach(0..<viewModel.sampleRow.count, id: \.self) { index in
-                        Text("Column \(index + 1)").tag(index)
+                VStack(alignment: .leading, spacing: 8) {
+                    Picker(column.rawValue, selection: columnBinding(for: column)) {
+                        Text("Not Mapped").tag(-1)
+                        ForEach(0..<viewModel.sampleRow.count, id: \.self) { index in
+                            Text("Column \(index + 1)").tag(index)
+                        }
+                    }
+                    
+                    if column == .operatingCapacity {
+                        Picker("Default \(column.rawValue)", selection: $viewModel.columnMapping.defaultOperatingCapacity) {
+                            ForEach(OperatingCapacity.allCases, id: \.rawValue) { capacity in
+                                Text(capacity.rawValue).tag(capacity)
+                            }
+                        }
                     }
                 }
             }
@@ -152,4 +162,4 @@ struct ColumnMapper: View {
 
 #Preview {
     ColumnMapper(viewModel: ImportViewModel())
-} 
+}
