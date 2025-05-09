@@ -25,8 +25,7 @@ final class FlightDetailViewModel: ObservableObject {
 
   enum ValidationError: LocalizedError {
     case missingFlightNumber
-    case missingAircraftRegistration
-    case missingAircraftType
+    case missingAircraft
     case missingDepartureAirport
     case missingArrivalAirport
     case missingPilotInCommand
@@ -40,10 +39,8 @@ final class FlightDetailViewModel: ObservableObject {
       switch self {
       case .missingFlightNumber:
         return "Flight number is required"
-      case .missingAircraftRegistration:
-        return "Aircraft registration is required"
-      case .missingAircraftType:
-        return "Aircraft type is required"
+      case .missingAircraft:
+        return "Aircraft is required"
       case .missingDepartureAirport:
         return "Departure airport is required"
       case .missingArrivalAirport:
@@ -254,12 +251,13 @@ final class FlightDetailViewModel: ObservableObject {
     if draftFlight.flightNumber.isEmpty {
       return .missingFlightNumber
     }
-    if draftFlight.aircraftRegistration.isEmpty {
-      return .missingAircraftRegistration
+
+    // Aircraft validation
+    if draftFlight.aircraftId == 0 || draftFlight.aircraft == nil {
+      return .missingAircraft
     }
-    if draftFlight.aircraftType.isEmpty {
-      return .missingAircraftType
-    }
+
+    // Airport validation
     if draftFlight.departureAirportId == 0 {
       return .missingDepartureAirport
     }

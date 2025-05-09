@@ -8,8 +8,9 @@ struct Flight: Identifiable, Codable {
   var id: UUID
   var flightNumber: String
   var date: Date
-  var aircraftRegistration: String
-  var aircraftType: String
+  //    var aircraftRegistration: String
+  //    var aircraftType: String
+  var aircraftId: Int
   var operatingCapacity: OperatingCapacity
   var departureAirportId: Int
   var arrivalAirportId: Int
@@ -30,6 +31,7 @@ struct Flight: Identifiable, Codable {
 
   var departureAirport: Airport?
   var arrivalAirport: Airport?
+  var aircraft: Aircraft?
 
   // MARK: - Static Properties
 
@@ -97,6 +99,14 @@ struct Flight: Identifiable, Codable {
     arrivalAirport?.icao ?? ""
   }
 
+  var aircraftRegistration: String {
+    aircraft?.registration ?? ""
+  }
+
+  var aircraftType: String {
+    aircraft?.type ?? ""
+  }
+
   // MARK: - Time Calculations
 
   var blockTime: TimeInterval {
@@ -162,8 +172,9 @@ struct Flight: Identifiable, Codable {
     id: UUID,
     flightNumber: String,
     date: Date,
-    aircraftRegistration: String,
-    aircraftType: String,
+    //        aircraftRegistration: String,
+    //        aircraftType: String,
+    aircraftId: Int,
     departureAirportId: Int,
     arrivalAirportId: Int,
     pilotInCommand: String,
@@ -183,8 +194,8 @@ struct Flight: Identifiable, Codable {
     self.id = id
     self.flightNumber = flightNumber
     self.date = date
-    self.aircraftRegistration = aircraftRegistration
-    self.aircraftType = aircraftType
+    //        self.aircraftRegistration = aircraftRegistration
+    //        self.aircraftType = aircraftType
     self.departureAirportId = departureAirportId
     self.arrivalAirportId = arrivalAirportId
     self.pilotInCommand = pilotInCommand
@@ -200,6 +211,7 @@ struct Flight: Identifiable, Codable {
     self.storedInTime = inTime
     self.notes = notes
     self.userId = userId
+    self.aircraftId = aircraftId
   }
 
   // MARK: - Helper Methods
@@ -318,8 +330,9 @@ struct Flight: Identifiable, Codable {
       id: UUID(),
       flightNumber: "",
       date: Self.utcCalendar.startOfDay(for: now),
-      aircraftRegistration: "",
-      aircraftType: "",
+      //            aircraftRegistration: "",
+      //            aircraftType: "",
+      aircraftId: -1,
       departureAirportId: 0,
       arrivalAirportId: 0,
       pilotInCommand: "",
@@ -334,8 +347,7 @@ struct Flight: Identifiable, Codable {
       onTime: now.addingTimeInterval(2 * 60 * 60),
       inTime: now.addingTimeInterval(2.5 * 60 * 60),
       notes: nil,
-      userId: 1
-    )
+      userId: 1)
   }
 }
 
@@ -346,6 +358,9 @@ extension Flight: TableRecord {
     Airport.self, key: "departureAirport", using: ForeignKey(["departureAirportId"]))
   static let arrivalAirport = belongsTo(
     Airport.self, key: "arrivalAirport", using: ForeignKey(["arrivalAirportId"]))
+
+  static let aircraft = belongsTo(
+    Aircraft.self, key: "aircraft", using: ForeignKey(["aircraftId"]))
 }
 
 extension Flight: PersistableRecord {
@@ -355,8 +370,9 @@ extension Flight: PersistableRecord {
     container[Columns.id] = id
     container[Columns.flightNumber] = flightNumber
     container[Columns.date] = date
-    container[Columns.aircraftRegistration] = aircraftRegistration
-    container[Columns.aircraftType] = aircraftType
+    //        container[Columns.aircraftRegistration] = aircraftRegistration
+    //        container[Columns.aircraftType] = aircraftType
+    container[Columns.aircraftId] = aircraftId
     container[Columns.departureAirportId] = departureAirportId
     container[Columns.arrivalAirportId] = arrivalAirportId
     container[Columns.pilotInCommand] = pilotInCommand
@@ -381,8 +397,7 @@ extension Flight: PersistableRecord {
     self.id = row[Columns.id]
     self.flightNumber = row[Columns.flightNumber]
     self.date = row[Columns.date]
-    self.aircraftRegistration = row[Columns.aircraftRegistration]
-    self.aircraftType = row[Columns.aircraftType]
+    self.aircraftId = row[Columns.aircraftId]
     self.departureAirportId = row[Columns.departureAirportId]
     self.arrivalAirportId = row[Columns.arrivalAirportId]
     self.pilotInCommand = row[Columns.pilotInCommand]
@@ -402,5 +417,6 @@ extension Flight: PersistableRecord {
     // Initialize relationships
     self.departureAirport = row["departureAirport"]
     self.arrivalAirport = row["arrivalAirport"]
+    self.aircraft = row["aircraft"]
   }
 }

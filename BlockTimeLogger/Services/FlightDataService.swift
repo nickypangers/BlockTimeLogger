@@ -82,8 +82,9 @@ class FlightDataService: FlightDataServiceProtocol {
                 id: UUID(),
                 flightNumber: flightNum,
                 date: date,
-                aircraftRegistration: aircraftReg,
-                aircraftType: aircraftType,
+//                aircraftRegistration: aircraftReg,
+//                aircraftType: aircraftType,
+                aircraftId: 0,
                 departureAirportId: 1, // Using integer IDs starting from 1
                 arrivalAirportId: 2,
                 pilotInCommand: pilotInCommand,

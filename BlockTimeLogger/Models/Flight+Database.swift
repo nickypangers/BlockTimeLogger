@@ -13,8 +13,9 @@ extension Flight {
         case id
         case flightNumber
         case date
-        case aircraftRegistration
-        case aircraftType
+//        case aircraftRegistration
+//        case aircraftType
+        case aircraftId
         case departureAirportId
         case arrivalAirportId
         case pilotInCommand
@@ -31,9 +32,9 @@ extension Flight {
         case notes
         case userId
     }
-    
+
     static let databaseTableName = "flight"
-    
+
     // Join query to get departure airport ICAO
     static func departureAirportQuery() -> String {
         """
@@ -43,13 +44,22 @@ extension Flight {
         WHERE f.id = ?
         """
     }
-    
+
     // Join query to get arrival airport ICAO
     static func arrivalAirportQuery() -> String {
         """
         SELECT a.icao
         FROM \(databaseTableName) f
         JOIN \(Airport.databaseTableName) a ON a.id = f.\(Columns.arrivalAirportId)
+        WHERE f.id = ?
+        """
+    }
+
+    static func aircraftQuery() -> String {
+        """
+        SELECT a.aircraftId
+        FROM \(databaseTableName) f
+        JOIN \(Aircraft.databaseTableName) a ON a.id = f.\(Columns.aircraftId)
         WHERE f.id = ?
         """
     }
