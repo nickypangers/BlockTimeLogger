@@ -5,11 +5,16 @@
 //  Created by Nixon Pang on 10/5/2025.
 //
 
+import RevenueCat
 import SwiftUI
 
-struct PaywallView: View {
+struct LocalPaywallView: View {
   @Environment(\.dismiss) private var dismiss
+  @StateObject private var revenueCat = RevenueCatService.shared
   @State private var selectedPlan: SubscriptionPlan = .monthly
+  @State private var isPurchasing = false
+  @State private var showError = false
+  @State private var errorMessage = ""
 
   enum SubscriptionPlan: String, CaseIterable {
     case monthly = "Monthly"
@@ -68,20 +73,21 @@ struct PaywallView: View {
           // Features
           VStack(spacing: 24) {
             FeatureRow(
-              icon: "infinity", title: "Unlimited Flights",
-              description: "Log as many flights as you need")
+              icon: "infinity", title: "Unlimited Flights & Sims",
+              description: "Log as many flights and simulator sessions as you need")
             FeatureRow(
               icon: "chart.bar.fill", title: "Advanced Analytics",
-              description: "Detailed insights and statistics")
+              description: "Detailed insights and statistics about your flying")
+            FeatureRow(
+              icon: "doc.text.fill", title: "Export Options",
+              description: "Multiple export formats and templates")
             FeatureRow(
               icon: "icloud.fill", title: "Cloud Sync",
               description: "Access your data across all devices")
             FeatureRow(
-              icon: "doc.text.fill", title: "Export Options",
-              description: "Multiple export formats and templates")
-            //            FeatureRow(
-            //              icon: "bell.fill", title: "Custom Reminders",
-            //              description: "Set up notifications for important events")
+              icon: "chart.line.uptrend.xyaxis", title: "Custom Reports & Insights",
+              description:
+                "Create personalized reports and get deeper insights into your flying patterns")
           }
           .padding(.horizontal)
 
@@ -98,17 +104,36 @@ struct PaywallView: View {
 
           // Subscribe Button
           Button {
-            // TODO: Implement subscription purchase
+            Task {
+              await purchase()
+            }
           } label: {
-            Text("Subscribe Now")
-              .font(.headline)
-              .frame(maxWidth: .infinity)
-              .padding()
-              .background(Color.accentColor)
-              .foregroundColor(.white)
-              .cornerRadius(12)
+            if isPurchasing {
+              ProgressView()
+                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+            } else {
+              Text("Subscribe Now")
+                .font(.headline)
+            }
           }
+          .frame(maxWidth: .infinity)
+          .padding()
+          .background(Color.accentColor)
+          .foregroundColor(.white)
+          .cornerRadius(12)
+          .disabled(isPurchasing)
           .padding(.horizontal)
+
+          // Restore Purchases
+          Button {
+            Task {
+              await restorePurchases()
+            }
+          } label: {
+            Text("Restore Purchases")
+              .font(.subheadline)
+              .foregroundColor(.secondary)
+          }
 
           // Terms
           Text(
@@ -132,12 +157,46 @@ struct PaywallView: View {
           }
         }
       }
+      .alert("Error", isPresented: $showError) {
+        Button("OK", role: .cancel) {}
+      } message: {
+        Text(errorMessage)
+      }
     }
+  }
+
+  private func purchase() async {
+    isPurchasing = true
+    do {
+      try await revenueCat.purchase(plan: selectedPlan)
+      dismiss()
+    } catch {
+      errorMessage = error.localizedDescription
+      showError = true
+    }
+    isPurchasing = false
+  }
+
+  private func restorePurchases() async {
+    isPurchasing = true
+    do {
+      try await revenueCat.restorePurchases()
+      if revenueCat.isPro {
+        dismiss()
+      } else {
+        errorMessage = "No previous purchases found"
+        showError = true
+      }
+    } catch {
+      errorMessage = error.localizedDescription
+      showError = true
+    }
+    isPurchasing = false
   }
 }
 
 struct SubscriptionPlanButton: View {
-  let plan: PaywallView.SubscriptionPlan
+  let plan: LocalPaywallView.SubscriptionPlan
   let isSelected: Bool
   let action: () -> Void
 
@@ -188,5 +247,5 @@ struct SubscriptionPlanButton: View {
 }
 
 #Preview {
-  PaywallView()
+  LocalPaywallView()
 }

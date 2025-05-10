@@ -11,10 +11,12 @@
 		3D6071BD2DA983EF00A186F0 /* Inject in Frameworks */ = {isa = PBXBuildFile; productRef = 3D6071BC2DA983EF00A186F0 /* Inject */; };
 		3DA2828F2DCEFA2700F0186E /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 3DA2828E2DCEFA2700F0186E /* RevenueCat */; };
 		3DA282912DCEFA2700F0186E /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = 3DA282902DCEFA2700F0186E /* RevenueCatUI */; };
+		3DA282A12DCF151200F0186E /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA282A02DCF151200F0186E /* StoreKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		3D14E4FD2D968A25004D66C3 /* BlockTimeLogger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BlockTimeLogger.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3DA282A02DCF151200F0186E /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -32,6 +34,7 @@
 			files = (
 				3DA282912DCEFA2700F0186E /* RevenueCatUI in Frameworks */,
 				3D6071AD2DA3C56200A186F0 /* GRDB in Frameworks */,
+				3DA282A12DCF151200F0186E /* StoreKit.framework in Frameworks */,
 				3D6071BD2DA983EF00A186F0 /* Inject in Frameworks */,
 				3DA2828F2DCEFA2700F0186E /* RevenueCat in Frameworks */,
 			);
@@ -44,6 +47,7 @@
 			isa = PBXGroup;
 			children = (
 				3D14E4FF2D968A25004D66C3 /* BlockTimeLogger */,
+				3DA2829F2DCF151200F0186E /* Frameworks */,
 				3D14E4FE2D968A25004D66C3 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,6 +58,14 @@
 				3D14E4FD2D968A25004D66C3 /* BlockTimeLogger.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		3DA2829F2DCF151200F0186E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				3DA282A02DCF151200F0186E /* StoreKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -271,7 +283,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "\"BlockTimeLogger/Preview Content\"";
 				DEVELOPMENT_TEAM = V4NZK4R79F;
 				ENABLE_PREVIEWS = YES;
@@ -303,7 +315,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "\"BlockTimeLogger/Preview Content\"";
 				DEVELOPMENT_TEAM = V4NZK4R79F;
 				ENABLE_PREVIEWS = YES;
