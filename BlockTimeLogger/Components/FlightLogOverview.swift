@@ -33,7 +33,7 @@ struct FlightLogOverview: View {
       }
 
       // Main flight info
-      HStack(alignment: .top) {
+      HStack(alignment: .top, spacing: 0) {
         VStack(alignment: .leading) {
           Text(flight.departureAirportICAO)
             .font(.title2)
@@ -42,10 +42,9 @@ struct FlightLogOverview: View {
             .font(.subheadline)
             .foregroundColor(Color("SteelGray"))
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
 
-        Spacer()
-
-        VStack {
+        VStack(alignment: .center) {
           Text(flight.formattedBlockTime)
             .font(.title2)
             .bold()
@@ -53,8 +52,7 @@ struct FlightLogOverview: View {
             .font(.subheadline)
             .foregroundColor(Color("SteelGray"))
         }
-
-        Spacer()
+        .frame(maxWidth: .infinity)
 
         VStack(alignment: .trailing) {
           Text(flight.arrivalAirportICAO)
@@ -64,6 +62,7 @@ struct FlightLogOverview: View {
             .font(.subheadline)
             .foregroundColor(Color("SteelGray"))
         }
+        .frame(maxWidth: .infinity, alignment: .trailing)
       }
 
       // Tags section

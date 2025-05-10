@@ -293,12 +293,34 @@ extension LocalDatabase {
 // MARK: - Aircraft Operations
 
 extension LocalDatabase {
-  func createAircraft(_ aircraft: Aircraft) throws {
+  func createAircraft(_ aircraft: Aircraft) throws -> Aircraft {
     print("LocalDatabase: Creating aircraft: \(aircraft.registration)")
+    var createdAircraft = aircraft
     try writer.write { db in
-      try aircraft.insert(db)
+      try createdAircraft.insert(db)
+      // Get the last inserted row ID and convert to Int
+      createdAircraft.id = Int(db.lastInsertedRowID)
     }
-    print("LocalDatabase: Successfully created aircraft: \(aircraft.registration)")
+    print(
+      "LocalDatabase: Successfully created aircraft: \(createdAircraft.registration) with ID: \(createdAircraft.id)"
+    )
+    return createdAircraft
+  }
+
+  func updateAircraft(_ aircraft: Aircraft) throws {
+    print("LocalDatabase: Updating aircraft: \(aircraft.registration)")
+    try writer.write { db in
+      try aircraft.update(db)
+    }
+    print("LocalDatabase: Successfully updated aircraft: \(aircraft.registration)")
+  }
+
+  func deleteAircraft(_ aircraft: Aircraft) throws {
+    print("LocalDatabase: Deleting aircraft: \(aircraft.registration)")
+    try writer.write { db in
+      try aircraft.delete(db)
+    }
+    print("LocalDatabase: Successfully deleted aircraft: \(aircraft.registration)")
   }
 
   func getAircraftByRegistration(_ registration: String) -> Aircraft? {
